@@ -34,12 +34,14 @@ run_module() {
 
     local module="$MODULE_DIR/$name"
 
-    if [[ ! -x "$module" ]]; then
+    if [[ -x "$module" ]]; then
+        exec "$module" "$@"
+    elif [[ -f "$module" ]]; then
+        exec bash "$module" "$@"
+    else
         printf 'Unknown command: %s\n\n' "$name" >&2
-        module="$MODULE_DIR/menu"
+        exec bash "$MODULE_DIR/menu" "$@"
     fi
-
-    exec "$module" "$@"
 }
 
 require_root() {
@@ -62,6 +64,7 @@ Commands:
   health     Show health dashboard
   doctor     Run diagnostics and health checks
   services   Manage and inspect services
+  wireguard  Manage WireGuard and WGDashboard checks
   ports      Inspect listening ports
   logs       Browse and filter system logs
   backup     Create and manage backups
