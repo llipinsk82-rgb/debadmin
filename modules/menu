@@ -23,7 +23,7 @@ case "$COMMAND" in
         section "Commands"
         panel_table
         panel_examples
-        footer_hint "deb menu run | deb health | deb update dry-run"
+        footer_hint "deb commands | deb MODULE help | deb menu run"
         ;;
     run|interactive)
         panel_run
