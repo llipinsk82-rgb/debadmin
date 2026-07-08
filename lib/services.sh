@@ -6,7 +6,7 @@ default_services() {
         return
     fi
 
-    printf '%s\n' ssh sshd cron nginx oscam oscam-panel blackserv apache2 mysql mariadb postgresql docker fail2ban ufw
+    printf '%s\n' ssh cron nginx oscam-panel blackserv oscam
 }
 
 service_exists() {
@@ -64,4 +64,17 @@ service_visual_state() {
         not-installed) status_text not-installed ;;
         *) status_text unknown ;;
     esac
+}
+
+services_for_dashboard() {
+    local service state
+
+    default_services | while read -r service; do
+        [[ -n "$service" ]] || continue
+        state="$(service_state "$service")"
+
+        if [[ "${DAT_SHOW_MISSING_SERVICES:-0}" == "1" || "$state" != "not-installed" ]]; then
+            printf '%s\n' "$service"
+        fi
+    done
 }
