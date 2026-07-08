@@ -61,12 +61,14 @@ case "$COMMAND" in
         base="$(wg_dashboard_base_dir)"
         local_version="$(wg_dashboard_local_version "$base")"
         latest_version="$(wg_dashboard_latest_version)"
+        update_status="$(wg_dashboard_version_status "$local_version" "${latest_version:-unknown}")"
+        python_status="$(wg_dashboard_python_status "$base")"
         kv "Path" "${base:-unknown}"
         kv "Local" "$local_version"
         kv "Latest" "${latest_version:-unknown}"
-        status_line "Update" "$(wg_dashboard_version_status "$local_version" "${latest_version:-unknown}")"
+        status_line "$update_status" "Update"
         kv "Python" "$(wg_dashboard_python "$base")"
-        status_line "Python req" "$(wg_dashboard_python_status "$base")"
+        status_line "$python_status" "Python req"
         footer_hint "backup before updating WGDashboard"
         ;;
     restart-dashboard|restart)
