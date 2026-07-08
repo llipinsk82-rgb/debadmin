@@ -3,7 +3,7 @@
 Professional terminal administration toolkit for Debian 12 servers.
 
 Status: Development  
-Version: 0.8.0
+Version: 0.9.0
 
 ## Goals
 
@@ -21,7 +21,7 @@ deb services   Service overview and service actions
 deb ports      Listening ports, filtering, and lookup
 deb logs       Log browser and filters
 deb backup     Backup profiles and archive management
-deb update     APT update helper
+deb update     Safe APT update workflow
 ```
 
 ## Services module
@@ -79,6 +79,19 @@ deb logs follow          Follow logs live
 ```
 
 Customize default log output in `/etc/debian-admin-toolkit/config` with `DAT_LOG_LINES`.
+
+## Update module
+
+```text
+deb update               Show update summary and upgradable packages
+deb update refresh       Run apt-get update
+deb update dry-run       Simulate upgrade
+deb update upgrade       Run apt-get upgrade -y
+deb update safe          update + upgrade + autoremove
+deb update logs          List update logs
+```
+
+Update logs are stored in `/var/log/debian-admin-toolkit` by default.
 
 ## Install
 
