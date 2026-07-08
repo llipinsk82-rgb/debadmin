@@ -4,19 +4,91 @@ set -euo pipefail
 DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
 [[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
 
-DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DAT_HOME="${DAT_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 LIB_DIR="$DAT_HOME/lib"
 
 source "$LIB_DIR/core.sh"
 load_library colors
 load_library output
+load_library logs
 
-header "DebAdmin Logs"
+logs_help() {
+    cat <<EOF
+DebAdmin Logs $DAT_VERSION
 
-if command_exists journalctl; then
-    section "Recent system journal"
-    journalctl -n "${1:-40}" --no-pager 2>/dev/null || true
-else
-    section "Recent syslog"
-    tail -n "${1:-40}" /var/log/syslog 2>/dev/null || printf 'No readable log source found.\n'
-fi
+Usage:
+  deb logs                 Show recent logs
+  deb logs recent [N]      Show recent N log lines
+  deb logs errors [N]      Show warnings/errors
+  deb logs service NAME [N] Show service logs
+  deb logs find QUERY [N]  Search recent logs
+  deb logs kernel [N]      Show kernel logs
+  deb logs boots           Show boot history
+  deb logs summary         Show log backend summary
+  deb logs follow [N]      Follow logs live
+  deb logs help            Show this help
+
+Config:
+  DAT_LOG_LINES controls default number of lines.
+EOF
+}
+
+COMMAND="${1:-recent}"
+shift || true
+
+case "$COMMAND" in
+    recent|tail)
+        lines="${1:-$(logs_default_lines)}"
+        header "DebAdmin Logs $DAT_VERSION"
+        kv "Backend" "$(logs_backend)"
+        kv "Lines" "$(logs_validate_lines "$lines")"
+        section "Recent logs"
+        logs_recent "$lines"
+        ;;
+    errors|warnings)
+        lines="${1:-$(logs_default_lines)}"
+        header "DebAdmin Log Warnings $DAT_VERSION"
+        kv "Lines" "$(logs_validate_lines "$lines")"
+        section "Warnings and errors"
+        logs_errors "$lines"
+        ;;
+    service|unit)
+        service="${1:-}"
+        lines="${2:-$(logs_default_lines)}"
+        [[ -n "$service" ]] || die "Service name required."
+        header "DebAdmin Logs: $service"
+        logs_service "$service" "$lines"
+        ;;
+    find|search|grep)
+        query="${1:-}"
+        lines="${2:-200}"
+        [[ -n "$query" ]] || die "Search query required."
+        header "DebAdmin Log Search: $query"
+        logs_search "$query" "$lines"
+        ;;
+    kernel|dmesg)
+        lines="${1:-$(logs_default_lines)}"
+        header "DebAdmin Kernel Logs"
+        logs_kernel "$lines"
+        ;;
+    boots)
+        header "DebAdmin Boot History"
+        logs_boots
+        ;;
+    summary)
+        header "DebAdmin Logs Summary"
+        logs_summary
+        ;;
+    follow|live)
+        lines="${1:-40}"
+        header "DebAdmin Logs Follow"
+        logs_follow "$lines"
+        ;;
+    help|-h|--help)
+        logs_help
+        ;;
+    *)
+        die "Unknown logs command: $COMMAND"
+        ;;
+esac
