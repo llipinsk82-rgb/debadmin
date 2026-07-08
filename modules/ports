@@ -4,15 +4,67 @@ set -euo pipefail
 DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
 [[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
 
-DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DAT_HOME="${DAT_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 LIB_DIR="$DAT_HOME/lib"
 
 source "$LIB_DIR/core.sh"
 load_library colors
 load_library output
-load_library system
+load_library ports
 
-header "DebAdmin Ports"
-section "Listening TCP/UDP sockets"
-listening_ports | sed -n '1,30p'
-printf '\n'
+ports_help() {
+    cat <<EOF
+DebAdmin Ports $DAT_VERSION
+
+Usage:
+  deb ports              Show listening ports overview
+  deb ports list         Show listening ports overview
+  deb ports all          Show raw socket output
+  deb ports find QUERY   Filter ports by text
+  deb ports port NUMBER  Find listeners on port
+  deb ports summary      Show listener counts
+  deb ports help         Show this help
+EOF
+}
+
+COMMAND="${1:-list}"
+shift || true
+
+case "$COMMAND" in
+    list)
+        header "DebAdmin Ports $DAT_VERSION"
+        kv "Backend" "$(ports_backend)"
+        kv "Summary" "$(ports_summary)"
+        section "Listening ports"
+        ports_list
+        footer_hint "deb ports port 80 | deb ports find nginx"
+        ;;
+    all)
+        header "DebAdmin Ports Raw $DAT_VERSION"
+        ports_list_all
+        ;;
+    find|search|grep)
+        query="${1:-}"
+        [[ -n "$query" ]] || die "Search query required."
+        header "DebAdmin Ports Search: $query"
+        ports_filter "$query"
+        ;;
+    port)
+        port="${1:-}"
+        [[ -n "$port" ]] || die "Port number required."
+        header "DebAdmin Port: $port"
+        port_lookup "$port"
+        ;;
+    summary)
+        header "DebAdmin Ports Summary"
+        kv "Backend" "$(ports_backend)"
+        kv "Summary" "$(ports_summary)"
+        ;;
+    help|-h|--help)
+        ports_help
+        ;;
+    *)
+        die "Unknown ports command: $COMMAND"
+        ;;
+esac
