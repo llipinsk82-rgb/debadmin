@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0
+
+- Added unified terminal panel baseline.
+- Added shared panel helpers in `lib/panel.sh`.
+- Added interactive command picker with `deb menu run`.
+- Refreshed CLI help and README for stable baseline.
+- Added VPS testing checklist in `docs/TESTING.md`.
+- Completed roadmap through v1.0.0.
+
 ## 0.9.0
 
 - Added Update module baseline.
