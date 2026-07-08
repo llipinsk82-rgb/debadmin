@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.0
+
+- Added Logs module baseline.
+- Added shared log helpers in `lib/logs.sh`.
+- Added journal/syslog backend detection.
+- Added recent logs, warning/error logs, service logs, search, kernel logs, boot history, and live follow mode.
+- Added configurable default log line count.
+- Updated README and roadmap for v0.8.0.
+
 ## 0.7.0
 
 - Added Backup module baseline.
