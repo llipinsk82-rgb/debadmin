@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.0
+
+- Added Update module baseline.
+- Added shared update helpers in `lib/update.sh`.
+- Added update summary, upgradable package list, refresh, dry-run, upgrade, full-upgrade, autoremove, autoclean, and safe workflow.
+- Added update log creation, listing, and latest log view.
+- Updated README and roadmap for v0.9.0.
+
 ## 0.8.0
 
 - Added Logs module baseline.
