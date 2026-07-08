@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+- Expanded Services module into an actionable service panel.
+- Added service overview, detail view, and journal log view.
+- Added start, stop, restart, reload, enable, and disable helpers.
+- Added reusable service row and detail helpers in `lib/services.sh`.
+- Updated README and roadmap for v0.4.0.
+
 ## 0.3.0 polish
 
 - Polished Health Dashboard terminal layout.
