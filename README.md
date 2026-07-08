@@ -3,7 +3,7 @@
 Professional terminal administration toolkit for Debian 12 servers.
 
 Status: Development  
-Version: 0.5.0
+Version: 0.6.0
 
 ## Goals
 
@@ -16,7 +16,7 @@ Inspired by tools such as `btop`, `fastfetch`, `lazygit`, and `ncdu`, but intent
 ```text
 deb menu       Command overview
 deb health     Health dashboard
-deb doctor     Basic diagnostics
+deb doctor     Diagnostics and health checks
 deb services   Service overview and service actions
 deb ports      Listening ports, filtering, and lookup
 deb logs       Recent system logs
@@ -42,6 +42,16 @@ deb ports              Show listening ports overview
 deb ports all          Show raw socket output
 deb ports find nginx   Filter ports by text
 deb ports port 80      Find listeners on port
+```
+
+## Doctor module
+
+```text
+deb doctor             Run all diagnostics
+deb doctor system      Run system checks
+deb doctor tools       Run dependency checks
+deb doctor resources   Run CPU/RAM/disk checks
+deb doctor services    Run configured service checks
 ```
 
 ## Install
