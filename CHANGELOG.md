@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0
+
+- Added Backup module baseline.
+- Added shared backup helpers in `lib/backup.sh`.
+- Added backup profiles: default, dat, apt, and ssh.
+- Added archive listing, latest lookup, verification, contents preview, and pruning.
+- Added configurable backup directory and item list.
+- Updated README and roadmap for v0.7.0.
+
 ## 0.6.0
 
 - Added Doctor module baseline.
