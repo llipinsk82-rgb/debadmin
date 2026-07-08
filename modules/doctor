@@ -4,31 +4,89 @@ set -euo pipefail
 DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
 [[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
 
-DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DAT_HOME="${DAT_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 LIB_DIR="$DAT_HOME/lib"
 
 source "$LIB_DIR/core.sh"
 load_library colors
 load_library output
 load_library system
+load_library services
+load_library ports
+load_library doctor
 
-header "DebAdmin Doctor"
+doctor_help() {
+    cat <<EOF
+DebAdmin Doctor $DAT_VERSION
 
-section "Checks"
-[[ -r /etc/os-release ]] && status_line ok "/etc/os-release readable" || status_line fail "/etc/os-release readable"
-[[ -r /proc/loadavg ]] && status_line ok "/proc/loadavg readable" || status_line fail "/proc/loadavg readable"
-[[ -r /proc/meminfo ]] && status_line ok "/proc/meminfo readable" || status_line fail "/proc/meminfo readable"
-command_exists systemctl && status_line ok "systemctl available" || status_line warn "systemctl available"
-command_exists ss && status_line ok "ss available" || status_line warn "ss available"
-command_exists curl && status_line ok "curl available for public IP" || status_line warn "curl available for public IP"
+Usage:
+  deb doctor              Run all diagnostics
+  deb doctor full         Run all diagnostics
+  deb doctor system       Run system checks
+  deb doctor tools        Run tool dependency checks
+  deb doctor resources    Run CPU/RAM/disk checks
+  deb doctor network      Run network checks
+  deb doctor ports        Run port backend checks
+  deb doctor services     Run configured service checks
+  deb doctor help         Show this help
+EOF
+}
 
-section "Resource warning levels"
-cpu="$(get_cpu_usage)"
-ram="$(get_ram_percent)"
-disk="$(get_disk_percent)"
+COMMAND="${1:-full}"
+shift || true
 
-(( cpu >= 90 )) && status_line fail "CPU usage ${cpu}%" || status_line ok "CPU usage ${cpu}%"
-(( ram >= 90 )) && status_line fail "RAM usage ${ram}%" || status_line ok "RAM usage ${ram}%"
-(( disk >= 90 )) && status_line fail "Disk usage ${disk}%" || status_line ok "Disk usage ${disk}%"
-
-printf '\n'
+case "$COMMAND" in
+    full|run|check)
+        header "DebAdmin Doctor $DAT_VERSION"
+        doctor_run_all
+        ;;
+    system)
+        header "DebAdmin Doctor: System"
+        doctor_reset
+        doctor_system_checks
+        section "Summary"
+        kv "Result" "$(doctor_summary)"
+        ;;
+    tools|deps|dependencies)
+        header "DebAdmin Doctor: Tools"
+        doctor_reset
+        doctor_dependency_checks
+        section "Summary"
+        kv "Result" "$(doctor_summary)"
+        ;;
+    resources)
+        header "DebAdmin Doctor: Resources"
+        doctor_reset
+        doctor_resource_checks
+        section "Summary"
+        kv "Result" "$(doctor_summary)"
+        ;;
+    network)
+        header "DebAdmin Doctor: Network"
+        doctor_reset
+        doctor_network_checks
+        section "Summary"
+        kv "Result" "$(doctor_summary)"
+        ;;
+    ports)
+        header "DebAdmin Doctor: Ports"
+        doctor_reset
+        doctor_port_checks
+        section "Summary"
+        kv "Result" "$(doctor_summary)"
+        ;;
+    services)
+        header "DebAdmin Doctor: Services"
+        doctor_reset
+        doctor_service_checks
+        section "Summary"
+        kv "Result" "$(doctor_summary)"
+        ;;
+    help|-h|--help)
+        doctor_help
+        ;;
+    *)
+        die "Unknown doctor command: $COMMAND"
+        ;;
+esac
