@@ -58,14 +58,14 @@ Usage:
   deb [command]
 
 Commands:
-  menu       Show command overview
+  menu       Show command panel
   health     Show health dashboard
-  doctor     Run basic diagnostics
-  services   Show common service states
-  ports      Show listening ports
-  logs       Show recent system logs
-  backup     Create a configuration backup
-  update     Run package index/update helper
+  doctor     Run diagnostics and health checks
+  services   Manage and inspect services
+  ports      Inspect listening ports
+  logs       Browse and filter system logs
+  backup     Create and manage backups
+  update     Run safe APT update workflow
 
 Options:
   -h, --help       Show help
