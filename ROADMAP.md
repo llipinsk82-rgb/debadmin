@@ -50,7 +50,15 @@ Status: completed baseline.
 
 ## v0.7.0 — Backup
 
-Backup profiles and restore helpers.
+Status: completed baseline.
+
+- Backup profiles
+- Configurable backup directory
+- Configurable backup item list
+- Archive listing
+- Archive verification
+- Archive contents preview
+- Backup pruning
 
 ## v0.8.0 — Logs
 
