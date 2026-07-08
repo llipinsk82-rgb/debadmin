@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
+[[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DAT_HOME="${DAT_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+LIB_DIR="$DAT_HOME/lib"
+
+source "$LIB_DIR/core.sh"
+load_library colors
+load_library output
+
+commands_help() {
+    cat <<EOF
+DebAdmin Commands $DAT_VERSION
+
+Usage:
+  deb commands        Show all supported commands and subcommands
+  deb commands all    Show all supported commands and subcommands
+  deb commands help   Show this help
+
+Tip:
+  Every module supports help, for example:
+  deb wireguard help
+  deb logs help
+  deb update help
+EOF
+}
+
+commands_all() {
+    header "DebAdmin Commands $DAT_VERSION"
+
+    section "Global"
+    cat <<EOF
+deb                         Show command panel
+deb help                    Show main help
+deb commands                Show this command list
+deb --version               Show toolkit version
+EOF
+
+    section "Menu"
+    cat <<EOF
+deb menu                    Show command panel
+deb menu run                Open interactive command picker
+deb menu help               Show menu help
+EOF
+
+    section "Health and doctor"
+    cat <<EOF
+deb health                  Show health dashboard
+deb doctor                  Run all diagnostics
+deb doctor system           Run system checks
+deb doctor tools            Run dependency checks
+deb doctor resources        Run CPU/RAM/disk checks
+deb doctor services         Run service checks
+deb doctor help             Show doctor help
+EOF
+
+    section "Services"
+    cat <<EOF
+deb services                Show service overview
+deb services list           Show service overview
+deb services all            Show configured services including missing ones
+deb services status NAME    Show service details
+deb services logs NAME N    Show service logs
+deb services start NAME     Start service as root
+deb services stop NAME      Stop service as root
+deb services restart NAME   Restart service as root
+deb services reload NAME    Reload service as root
+deb services enable NAME    Enable service as root
+deb services disable NAME   Disable service as root
+deb services help           Show services help
+EOF
+
+    section "WireGuard and WGDashboard"
+    cat <<EOF
+deb wireguard                       Show WireGuard and WGDashboard overview
+deb wireguard status                Show overview
+deb wireguard config IFACE          Check WireGuard config without secrets
+deb wireguard dashboard             Show WGDashboard service details
+deb wireguard public-check          Check configured public WGDashboard URL
+deb wireguard update-check          Compare local WGDashboard version with latest
+deb wireguard backups               Show WGDashboard and WireGuard backup paths
+deb wireguard cleanup-info          Show safe backup cleanup guidance
+deb wireguard restart-dashboard     Restart WGDashboard service as root
+deb wireguard restart-tunnel IFACE  Restart WireGuard tunnel as root
+deb wireguard logs N                Show WGDashboard logs
+deb wireguard help                  Show WireGuard help
+EOF
+
+    section "Ports"
+    cat <<EOF
+deb ports                   Show listening ports overview
+deb ports list              Show listening ports overview
+deb ports all               Show raw socket output
+deb ports find QUERY        Filter ports by text
+deb ports port NUMBER       Find listeners on port
+deb ports summary           Show listener counts
+deb ports help              Show ports help
+EOF
+
+    section "Logs"
+    cat <<EOF
+deb logs                    Show recent logs
+deb logs recent N           Show recent N log lines
+deb logs errors N           Show warnings/errors
+deb logs service NAME N     Show service logs
+deb logs find QUERY N       Search recent logs
+deb logs kernel N           Show kernel logs
+deb logs boots              Show boot history
+deb logs summary            Show log backend summary
+deb logs follow N           Follow logs live
+deb logs help               Show logs help
+EOF
+
+    section "Backup"
+    cat <<EOF
+deb backup                  Create default backup
+deb backup create PROFILE   Create backup profile
+deb backup list             List backup archives
+deb backup latest           Show latest archive path
+deb backup verify ARCHIVE   Verify archive, default latest
+deb backup contents ARCHIVE Show archive contents, default latest
+deb backup prune KEEP       Keep newest N archives
+deb backup profiles         Show available profiles
+deb backup help             Show backup help
+EOF
+
+    section "Update"
+    cat <<EOF
+deb update                  Show update summary
+deb update refresh          Run apt-get update
+deb update list             List upgradable packages
+deb update dry-run          Simulate apt upgrade
+deb update upgrade          Run apt-get upgrade -y
+deb update full-upgrade     Run apt-get full-upgrade -y
+deb update autoremove       Run apt-get autoremove -y
+deb update clean            Run apt-get autoclean
+deb update safe             update + upgrade + autoremove
+deb update security         Show likely security updates
+deb update logs             List update logs
+deb update log FILE N       Show update log, default latest
+deb update help             Show update help
+EOF
+}
+
+COMMAND="${1:-all}"
+shift || true
+
+case "$COMMAND" in
+    all|list|show)
+        commands_all
+        ;;
+    help|-h|--help)
+        commands_help
+        ;;
+    *)
+        die "Unknown commands command: $COMMAND"
+        ;;
+esac
