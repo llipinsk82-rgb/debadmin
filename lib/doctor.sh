@@ -15,15 +15,9 @@ doctor_record() {
     local label="$2"
 
     case "$state" in
-        ok)
-            doctor_pass=$((doctor_pass + 1))
-            ;;
-        warn)
-            doctor_warn=$((doctor_warn + 1))
-            ;;
-        fail)
-            doctor_fail=$((doctor_fail + 1))
-            ;;
+        ok) doctor_pass=$((doctor_pass + 1)) ;;
+        warn) doctor_warn=$((doctor_warn + 1)) ;;
+        fail) doctor_fail=$((doctor_fail + 1)) ;;
     esac
 
     status_line "$state" "$label"
@@ -136,7 +130,7 @@ doctor_service_checks() {
     local service state
 
     section "Configured services"
-    services_for_dashboard | while read -r service; do
+    while read -r service; do
         [[ -n "$service" ]] || continue
         state="$(service_state "$service")"
 
@@ -146,7 +140,7 @@ doctor_service_checks() {
             not-installed) doctor_record warn "$service installed" ;;
             *) doctor_record warn "$service state known" ;;
         esac
-    done
+    done < <(services_for_dashboard)
 }
 
 doctor_network_checks() {
