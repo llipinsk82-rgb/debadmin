@@ -25,9 +25,9 @@ service_info="$(service_summary)"
 header "DebAdmin Health Dashboard $DAT_VERSION"
 
 section "Overview"
-kv "CPU" "${cpu_percent}%"
-kv "RAM" "${ram_percent}%"
-kv "Disk" "${disk_percent}%"
+summary_bar "CPU" "$cpu_percent"
+summary_bar "RAM" "$ram_percent"
+summary_bar "Disk" "$disk_percent"
 kv "Services" "$service_info"
 
 section "System"
@@ -37,16 +37,11 @@ kv "Kernel" "$(get_kernel)"
 kv "Uptime" "$(get_uptime)"
 kv "Load avg" "$(get_load)"
 
-section "CPU"
-kv "Model" "$(get_cpu_model || printf 'unknown')"
-kv "Cores" "$(get_cpu_cores || printf 'unknown')"
-kv "Temp" "$(get_cpu_temp)"
-metric_bar "CPU" "$cpu_percent"
-
-section "Memory / Disk"
-metric_bar "RAM" "$ram_percent"
+section "Hardware"
+kv "CPU model" "$(get_cpu_model || printf 'unknown')"
+kv "CPU cores" "$(get_cpu_cores || printf 'unknown')"
+kv "CPU temp" "$(get_cpu_temp)"
 kv "RAM usage" "$(get_ram_summary)"
-metric_bar "Disk" "$disk_percent"
 kv "Disk usage" "$(get_disk_summary)"
 
 section "Network"
@@ -61,7 +56,7 @@ services_for_dashboard | while read -r service; do
     enabled="$(service_enabled_state "$service")"
     visual="$(service_visual_state "$state")"
 
-    printf '%-20s %-23b %s\n' "$service" "$visual" "$enabled"
+    printf '%-20s %-18b %s\n' "$service" "$visual" "$enabled"
 done
 
-printf '\n'
+footer_hint "deb services | deb doctor | deb ports"
