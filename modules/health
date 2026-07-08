@@ -15,7 +15,20 @@ load_library output
 load_library system
 load_library services
 
+cpu_percent="$(get_cpu_usage)"
+ram_percent="$(get_ram_percent)"
+disk_percent="$(get_disk_percent)"
+local_ip="$(get_local_ip || printf 'n/a')"
+public_ip="$(get_public_ip || printf 'n/a')"
+service_info="$(service_summary)"
+
 header "DebAdmin Health Dashboard $DAT_VERSION"
+
+section "Overview"
+kv "CPU" "${cpu_percent}%"
+kv "RAM" "${ram_percent}%"
+kv "Disk" "${disk_percent}%"
+kv "Services" "$service_info"
 
 section "System"
 kv "Hostname" "$(get_hostname)"
@@ -28,17 +41,17 @@ section "CPU"
 kv "Model" "$(get_cpu_model || printf 'unknown')"
 kv "Cores" "$(get_cpu_cores || printf 'unknown')"
 kv "Temp" "$(get_cpu_temp)"
-metric_bar "CPU" "$(get_cpu_usage)"
+metric_bar "CPU" "$cpu_percent"
 
 section "Memory / Disk"
-metric_bar "RAM" "$(get_ram_percent)"
+metric_bar "RAM" "$ram_percent"
 kv "RAM usage" "$(get_ram_summary)"
-metric_bar "Disk" "$(get_disk_percent)"
+metric_bar "Disk" "$disk_percent"
 kv "Disk usage" "$(get_disk_summary)"
 
 section "Network"
-kv "Local IP" "$(get_local_ip || printf 'n/a')"
-kv "Public IP" "$(get_public_ip || printf 'n/a')"
+kv "Local IP" "$local_ip"
+kv "Public IP" "$public_ip"
 
 section "Services"
 table_header "Service" "State" "Enabled"
