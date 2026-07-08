@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0
+
+- Added Ports module baseline.
+- Added shared port helpers in `lib/ports.sh`.
+- Added listening port overview with backend detection.
+- Added raw socket view, text filtering, and direct port lookup.
+- Updated README and roadmap for v0.5.0.
+
 ## 0.4.0
 
 - Expanded Services module into an actionable service panel.
