@@ -18,8 +18,8 @@ services_help() {
 DebAdmin Services $DAT_VERSION
 
 Usage:
-  deb services                 Show configured service overview
-  deb services list            Show configured service overview
+  deb services                 Show installed/configured service overview
+  deb services list            Show installed/configured service overview
   deb services all             Show configured services including missing ones
   deb services status NAME     Show service details
   deb services detail NAME     Show service details
@@ -34,11 +34,12 @@ Usage:
 
 Config:
   Edit DAT_SERVICES in /etc/debian-admin-toolkit/config to customize the list.
+  Set DAT_SHOW_MISSING_SERVICES=1 to show missing services in the default list.
 EOF
 }
 
 services_list() {
-    local source_cmd="${1:-default_services}"
+    local source_cmd="${1:-services_for_dashboard}"
 
     table_header "Service" "State" "Enabled"
     $source_cmd | while read -r service; do
@@ -71,12 +72,13 @@ shift || true
 case "$COMMAND" in
     list)
         header "DebAdmin Services $DAT_VERSION"
-        services_list default_services
-        footer_hint "deb services status nginx | deb services logs nginx 50"
+        services_list services_for_dashboard
+        footer_hint "deb services all | deb services status nginx"
         ;;
     all)
         header "DebAdmin Services $DAT_VERSION"
         services_list default_services
+        footer_hint "deb services list hides missing services by default"
         ;;
     status|detail)
         service="${1:-}"
