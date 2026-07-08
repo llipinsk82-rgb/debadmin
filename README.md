@@ -2,8 +2,8 @@
 
 Professional terminal administration toolkit for Debian 12 servers.
 
-Status: Development  
-Version: 0.9.0
+Status: Stable baseline  
+Version: 1.0.0
 
 ## Goals
 
@@ -14,7 +14,7 @@ Inspired by tools such as `btop`, `fastfetch`, `lazygit`, and `ncdu`, but intent
 ## Current commands
 
 ```text
-deb menu       Command overview
+deb menu       Command panel
 deb health     Health dashboard
 deb doctor     Diagnostics and health checks
 deb services   Service overview and service actions
@@ -22,6 +22,15 @@ deb ports      Listening ports, filtering, and lookup
 deb logs       Log browser and filters
 deb backup     Backup profiles and archive management
 deb update     Safe APT update workflow
+```
+
+## Panel
+
+```text
+deb              Show command panel
+deb menu         Show command panel
+deb menu run     Open interactive command picker
+deb menu help    Show menu help
 ```
 
 ## Services module
@@ -102,7 +111,21 @@ sudo ./install.sh
 After installation:
 
 ```bash
+deb
+```
+
+## Test checklist
+
+```bash
+deb --version
+deb
 deb health
+deb doctor
+deb services
+deb ports
+deb logs summary
+deb backup profiles
+deb update dry-run
 ```
 
 ## Project rules
