@@ -6,6 +6,9 @@ BIN_DIR="${BIN_DIR:-/usr/local/bin}"
 CONFIG_DIR="${CONFIG_DIR:-/etc/debian-admin-toolkit}"
 DEFAULT_SERVICES="ssh cron nginx oscam-panel blackserv oscam"
 DEFAULT_BACKUP_ITEMS="/etc/debian-admin-toolkit /etc/ssh /etc/apt/sources.list /etc/apt/sources.list.d"
+DEFAULT_WG_DASHBOARD_SERVICE="wg-dashboard"
+DEFAULT_WG_DASHBOARD_PORT="10086"
+DEFAULT_WG_DASHBOARD_URL="http://127.0.0.1:10086/"
 
 if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
     echo "Run installer as root." >&2
@@ -15,6 +18,10 @@ fi
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 install -d "$PREFIX" "$PREFIX/bin" "$PREFIX/lib" "$PREFIX/modules" "$CONFIG_DIR" "$BIN_DIR"
+
+if [[ -f "$CONFIG_DIR/config" ]]; then
+    source "$CONFIG_DIR/config"
+fi
 
 cp -R "$ROOT_DIR/bin" "$ROOT_DIR/lib" "$ROOT_DIR/modules" "$ROOT_DIR/docs" "$PREFIX/" 2>/dev/null || true
 cp "$ROOT_DIR/VERSION" "$ROOT_DIR/README.md" "$ROOT_DIR/LICENSE" "$PREFIX/" 2>/dev/null || true
@@ -26,6 +33,10 @@ DAT_SHOW_MISSING_SERVICES="${DAT_SHOW_MISSING_SERVICES:-0}"
 DAT_BACKUP_DIR="${DAT_BACKUP_DIR:-/var/backups/debian-admin-toolkit}"
 DAT_BACKUP_ITEMS="${DAT_BACKUP_ITEMS:-$DEFAULT_BACKUP_ITEMS}"
 DAT_LOG_LINES="${DAT_LOG_LINES:-80}"
+DAT_WG_DASHBOARD_SERVICE="${DAT_WG_DASHBOARD_SERVICE:-$DEFAULT_WG_DASHBOARD_SERVICE}"
+DAT_WG_DASHBOARD_PORT="${DAT_WG_DASHBOARD_PORT:-$DEFAULT_WG_DASHBOARD_PORT}"
+DAT_WG_DASHBOARD_URL="${DAT_WG_DASHBOARD_URL:-$DEFAULT_WG_DASHBOARD_URL}"
+DAT_WG_DASHBOARD_VERSION="${DAT_WG_DASHBOARD_VERSION:-}"
 EOF
 
 chmod +x "$PREFIX/bin/deb" "$PREFIX/modules/"* 2>/dev/null || true
