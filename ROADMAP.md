@@ -62,7 +62,16 @@ Status: completed baseline.
 
 ## v0.8.0 — Logs
 
-Log browser and filters.
+Status: completed baseline.
+
+- Journal/syslog backend detection
+- Recent log view
+- Warning/error view
+- Service log view
+- Text search
+- Kernel logs
+- Boot history
+- Live follow mode
 
 ## v0.9.0 — Update
 
