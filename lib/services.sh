@@ -78,3 +78,31 @@ services_for_dashboard() {
         fi
     done
 }
+
+service_summary() {
+    local total=0
+    local active=0
+    local inactive=0
+    local other=0
+    local service state
+
+    while read -r service; do
+        [[ -n "$service" ]] || continue
+        state="$(service_state "$service")"
+        total=$((total + 1))
+
+        case "$state" in
+            active) active=$((active + 1)) ;;
+            inactive) inactive=$((inactive + 1)) ;;
+            *) other=$((other + 1)) ;;
+        esac
+    done < <(services_for_dashboard)
+
+    printf '%s/%s active' "$active" "$total"
+
+    if (( inactive > 0 || other > 0 )); then
+        printf '  issues:%s' $((inactive + other))
+    fi
+
+    printf '\n'
+}
