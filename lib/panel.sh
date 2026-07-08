@@ -4,6 +4,7 @@ panel_commands() {
     cat <<EOF
 health|System dashboard|deb health
 services|Service panel and actions|deb services
+wireguard|WireGuard and WGDashboard checks|deb wireguard
 ports|Ports overview and lookup|deb ports
 logs|Log browser and filters|deb logs summary
 backup|Backup profiles and archives|deb backup list
@@ -16,7 +17,7 @@ panel_command_status() {
     local command="$1"
     local module="$MODULE_DIR/$command"
 
-    if [[ -x "$module" ]]; then
+    if [[ -f "$module" ]]; then
         printf 'ready\n'
     else
         printf 'missing\n'
@@ -69,6 +70,17 @@ Usage:
 EOF
 }
 
+panel_run_module() {
+    local module="$1"
+    shift || true
+
+    if [[ -x "$module" ]]; then
+        "$module" "$@"
+    else
+        bash "$module" "$@"
+    fi
+}
+
 panel_run() {
     local choice
 
@@ -76,23 +88,25 @@ panel_run() {
         header "DebAdmin Panel $DAT_VERSION"
         printf '1) health\n'
         printf '2) services\n'
-        printf '3) ports\n'
-        printf '4) logs\n'
-        printf '5) backup\n'
-        printf '6) doctor\n'
-        printf '7) update\n'
+        printf '3) wireguard\n'
+        printf '4) ports\n'
+        printf '5) logs\n'
+        printf '6) backup\n'
+        printf '7) doctor\n'
+        printf '8) update\n'
         printf 'q) quit\n\n'
         printf 'Select: '
         read -r choice || return 0
 
         case "$choice" in
-            1|health) "$MODULE_DIR/health" ;;
-            2|services) "$MODULE_DIR/services" ;;
-            3|ports) "$MODULE_DIR/ports" ;;
-            4|logs) "$MODULE_DIR/logs" summary ;;
-            5|backup) "$MODULE_DIR/backup" list ;;
-            6|doctor) "$MODULE_DIR/doctor" ;;
-            7|update) "$MODULE_DIR/update" dry-run ;;
+            1|health) panel_run_module "$MODULE_DIR/health" ;;
+            2|services) panel_run_module "$MODULE_DIR/services" ;;
+            3|wireguard) panel_run_module "$MODULE_DIR/wireguard" ;;
+            4|ports) panel_run_module "$MODULE_DIR/ports" ;;
+            5|logs) panel_run_module "$MODULE_DIR/logs" summary ;;
+            6|backup) panel_run_module "$MODULE_DIR/backup" list ;;
+            7|doctor) panel_run_module "$MODULE_DIR/doctor" ;;
+            8|update) panel_run_module "$MODULE_DIR/update" dry-run ;;
             q|Q|quit|exit) return 0 ;;
             *) printf 'Unknown choice: %s\n' "$choice" ;;
         esac
