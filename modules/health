@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -e
+
+source /etc/debian-admin-toolkit/config
+source "$DAT_HOME/lib/core.sh"
+
+load_library colors
+load_library output
+load_library system
+load_library services
+
+header
+
+printf "%-15s %s\n" "Hostname" "$(get_hostname)"
+printf "%-15s %s\n" "OS" "$(get_os)"
+printf "%-15s %s\n" "Kernel" "$(get_kernel)"
+printf "%-15s %s\n" "Uptime" "$(get_uptime)"
+printf "%-15s %s\n" "Load" "$(get_load)"
+
+echo
+
+printf "%-15s %s%%\n" "CPU" "$(get_cpu_usage)"
+printf "%-15s %s%%\n" "RAM" "$(get_ram_percent)"
+printf "%-15s %s%%\n" "Disk" "$(get_disk_percent)"
+
+echo
+
+echo "Services"
+
+echo
+
+for svc in ssh nginx cron oscam-panel blackserv
+do
+
+if service_ok "$svc"
+then
+    ok "$svc"
+else
+    fail "$svc"
+fi
+
+done
+
+echo
