@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+
+- Polished Health Dashboard terminal layout.
+- Reduced dashboard width for SSH terminals.
+- Added explicit not-installed service state.
+- Reused shared service state formatting in health and services modules.
+
 ## 0.3.0
 
 - Rebuilt Debian Admin Toolkit baseline.
