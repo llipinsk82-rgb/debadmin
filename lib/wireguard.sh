@@ -174,35 +174,35 @@ wg_print_overview() {
     if [[ -n "$(wg_tunnels)" ]]; then
         wg_tunnels | while read -r iface; do
             [[ -n "$iface" ]] || continue
-            status_line "wg-quick@$iface" "$(service_state "wg-quick@$iface")"
+            status_line "$(service_state "wg-quick@$iface")" "wg-quick@$iface"
         done
     else
-        status_line "Tunnels" "missing"
+        status_line "missing" "Tunnels"
     fi
 
     section "WGDashboard"
     kv "Service" "$service"
-    status_line "State" "$state"
+    status_line "$state" "State"
     kv "Enabled" "$enabled"
     kv "Port" "$port"
     kv "URL" "$url"
     kv "Path" "${base:-unknown}"
     kv "Python" "$python"
-    status_line "Python req" "$(wg_dashboard_python_status "$base")"
+    status_line "$(wg_dashboard_python_status "$base")" "Python req"
     kv "Local ver" "$local_version"
     kv "Latest ver" "${latest_version:-unknown}"
-    status_line "Update" "$(wg_dashboard_version_status "$local_version" "${latest_version:-unknown}")"
+    status_line "$(wg_dashboard_version_status "$local_version" "${latest_version:-unknown}")" "Update"
 
     if wg_dashboard_port_open "$port"; then
-        status_line "Port check" "ok"
+        status_line "ok" "Port check"
     else
-        status_line "Port check" "fail"
+        status_line "fail" "Port check"
     fi
 
     if wg_dashboard_http_ok "$url"; then
-        status_line "HTTP check" "ok"
+        status_line "ok" "HTTP check"
     else
-        status_line "HTTP check" "fail"
+        status_line "fail" "HTTP check"
     fi
 }
 
@@ -215,28 +215,28 @@ wg_config_check() {
     kv "Config" "$cfg"
 
     if [[ -r "$cfg" ]]; then
-        status_line "Config file" "ok"
+        status_line "ok" "Config file"
     else
-        status_line "Config file" "fail"
+        status_line "fail" "Config file"
     fi
 
     if command_exists ip && ip link show "$iface" >/dev/null 2>&1; then
-        status_line "Interface" "ok"
+        status_line "ok" "Interface"
     else
-        status_line "Interface" "fail"
+        status_line "fail" "Interface"
     fi
 
     if command_exists wg && wg show "$iface" >/dev/null 2>&1; then
-        status_line "WG state" "ok"
+        status_line "ok" "WG state"
         peer_count="$(wg show "$iface" peers 2>/dev/null | wc -l | tr -d ' ')"
     else
-        status_line "WG state" "fail"
+        status_line "fail" "WG state"
     fi
 
     if command_exists wg-quick && wg-quick strip "$iface" >/dev/null 2>&1; then
-        status_line "Syntax" "ok"
+        status_line "ok" "Syntax"
     else
-        status_line "Syntax" "fail"
+        status_line "fail" "Syntax"
     fi
 
     kv "Peers" "$peer_count"
