@@ -61,6 +61,7 @@ Usage:
 
 Commands:
   menu       Show command panel
+  commands   Show all commands and subcommands
   health     Show health dashboard
   doctor     Run diagnostics and health checks
   services   Manage and inspect services
@@ -69,6 +70,10 @@ Commands:
   logs       Browse and filter system logs
   backup     Create and manage backups
   update     Run safe APT update workflow
+
+Help:
+  deb commands       Show full command reference
+  deb MODULE help    Show module subcommands, for example: deb wireguard help
 
 Options:
   -h, --help       Show help
