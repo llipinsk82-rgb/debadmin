@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.1
+
+- Added WGDashboard public URL check.
+- Added optional `DAT_WG_DASHBOARD_PUBLIC_URL` config field.
+- Added WGDashboard and WireGuard backup listing.
+- Added cleanup guidance for manual backup review.
+- Added WGDashboard maintenance documentation.
+
 ## 1.1.0
 
 - Added WireGuard module baseline.
