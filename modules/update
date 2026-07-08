@@ -4,19 +4,103 @@ set -euo pipefail
 DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
 [[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
 
-DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DAT_HOME="${DAT_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 LIB_DIR="$DAT_HOME/lib"
 
 source "$LIB_DIR/core.sh"
 load_library colors
 load_library output
+load_library update
 
-require_root
+update_help() {
+    cat <<EOF
+DebAdmin Update $DAT_VERSION
 
-header "DebAdmin Update"
+Usage:
+  deb update                  Show update summary and upgradable packages
+  deb update refresh          Run apt-get update
+  deb update list             List upgradable packages
+  deb update dry-run          Simulate apt upgrade
+  deb update upgrade          Run apt-get upgrade -y
+  deb update full-upgrade     Run apt-get full-upgrade -y
+  deb update autoremove       Run apt-get autoremove -y
+  deb update clean            Run apt-get autoclean
+  deb update safe             update + upgrade + autoremove
+  deb update security         Show likely security updates
+  deb update logs             List update logs
+  deb update log [FILE] [N]   Show update log, default latest
+  deb update help             Show this help
 
-section "APT update"
-apt-get update
+Config:
+  DAT_UPDATE_LOG_DIR controls update log directory.
+EOF
+}
 
-section "Upgradeable packages"
-apt list --upgradable 2>/dev/null | sed -n '1,30p'
+COMMAND="${1:-summary}"
+shift || true
+
+case "$COMMAND" in
+    summary|status)
+        header "DebAdmin Update $DAT_VERSION"
+        section "Summary"
+        update_summary
+        section "Upgradable packages"
+        update_list_upgradable
+        footer_hint "deb update dry-run | sudo deb update safe"
+        ;;
+    refresh)
+        header "DebAdmin Update Refresh"
+        update_refresh
+        ;;
+    list|upgradable)
+        header "DebAdmin Upgradable Packages"
+        update_list_upgradable
+        ;;
+    dry-run|simulate|plan)
+        header "DebAdmin Update Dry Run"
+        update_dry_run
+        ;;
+    upgrade)
+        header "DebAdmin Upgrade"
+        update_upgrade
+        ;;
+    full-upgrade|full)
+        header "DebAdmin Full Upgrade"
+        update_full_upgrade
+        ;;
+    autoremove)
+        header "DebAdmin Autoremove"
+        update_autoremove
+        ;;
+    clean|autoclean)
+        header "DebAdmin Update Clean"
+        update_clean
+        ;;
+    safe)
+        header "DebAdmin Safe Update"
+        update_safe
+        ;;
+    security)
+        header "DebAdmin Security Updates"
+        update_security_list
+        ;;
+    logs)
+        header "DebAdmin Update Logs"
+        kv "Directory" "$(update_log_dir)"
+        section "Logs"
+        update_log_list
+        ;;
+    log)
+        logfile="${1:-latest}"
+        lines="${2:-120}"
+        header "DebAdmin Update Log"
+        update_show_log "$logfile" "$lines"
+        ;;
+    help|-h|--help)
+        update_help
+        ;;
+    *)
+        die "Unknown update command: $COMMAND"
+        ;;
+esac
