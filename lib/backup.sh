@@ -4,17 +4,20 @@ backup_dir() {
     printf '%s\n' "${DAT_BACKUP_DIR:-/var/backups/debian-admin-toolkit}"
 }
 
+backup_default_items() {
+    if [[ -n "${DAT_BACKUP_ITEMS:-}" ]]; then
+        printf '%s\n' $DAT_BACKUP_ITEMS
+    else
+        printf '%s\n' /etc/debian-admin-toolkit /etc/ssh /etc/apt/sources.list /etc/apt/sources.list.d
+    fi
+}
+
 backup_profile_items() {
     local profile="${1:-default}"
 
-    if [[ -n "${DAT_BACKUP_ITEMS:-}" ]]; then
-        printf '%s\n' $DAT_BACKUP_ITEMS
-        return
-    fi
-
     case "$profile" in
         default|system)
-            printf '%s\n' /etc/debian-admin-toolkit /etc/ssh /etc/apt/sources.list /etc/apt/sources.list.d
+            backup_default_items
             ;;
         dat|toolkit)
             printf '%s\n' /etc/debian-admin-toolkit
@@ -24,6 +27,10 @@ backup_profile_items() {
             ;;
         ssh)
             printf '%s\n' /etc/ssh
+            ;;
+        custom)
+            [[ -n "${DAT_BACKUP_ITEMS:-}" ]] || { printf 'DAT_BACKUP_ITEMS is empty.\n' >&2; return 2; }
+            printf '%s\n' $DAT_BACKUP_ITEMS
             ;;
         *)
             printf 'Unknown backup profile: %s\n' "$profile" >&2
