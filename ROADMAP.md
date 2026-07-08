@@ -38,7 +38,15 @@ Status: completed baseline.
 
 ## v0.6.0 — Doctor
 
-Diagnostics and health checks.
+Status: completed baseline.
+
+- System checks
+- Required tool checks
+- Resource threshold checks
+- Network checks
+- Port backend checks
+- Configured service checks
+- Per-section diagnostics
 
 ## v0.7.0 — Backup
 
