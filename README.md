@@ -3,7 +3,7 @@
 Professional terminal administration toolkit for Debian 12 servers.
 
 Status: Stable baseline  
-Version: 1.0.0
+Version: 1.1.0
 
 ## Goals
 
@@ -14,14 +14,15 @@ Inspired by tools such as `btop`, `fastfetch`, `lazygit`, and `ncdu`, but intent
 ## Current commands
 
 ```text
-deb menu       Command panel
-deb health     Health dashboard
-deb doctor     Diagnostics and health checks
-deb services   Service overview and service actions
-deb ports      Listening ports, filtering, and lookup
-deb logs       Log browser and filters
-deb backup     Backup profiles and archive management
-deb update     Safe APT update workflow
+deb menu        Command panel
+deb health      Health dashboard
+deb doctor      Diagnostics and health checks
+deb services    Service overview and service actions
+deb wireguard   WireGuard and WGDashboard checks
+deb ports       Listening ports, filtering, and lookup
+deb logs        Log browser and filters
+deb backup      Backup profiles and archive management
+deb update      Safe APT update workflow
 ```
 
 ## Panel
@@ -43,8 +44,22 @@ deb services logs nginx 50   Show recent logs
 deb services restart nginx   Restart service as root
 ```
 
-WireGuard units named `wg-quick@*.service` are discovered automatically when present.
+WireGuard units named `wg-quick@*.service` and WGDashboard services are discovered automatically when present.
 Customize the watched service list in `/etc/debian-admin-toolkit/config` with `DAT_SERVICES`.
+
+## WireGuard module
+
+```text
+deb wireguard                      Show WireGuard and WGDashboard overview
+deb wireguard config wg0           Check WireGuard config without printing secrets
+deb wireguard dashboard            Show WGDashboard service details
+deb wireguard update-check         Compare local WGDashboard version with GitHub latest
+deb wireguard restart-dashboard    Restart WGDashboard service as root
+deb wireguard restart-tunnel wg0   Restart wg-quick tunnel as root
+deb wireguard logs 100             Show WGDashboard logs
+```
+
+The module checks `wg-dashboard.service`, the local HTTP endpoint, port `10086`, Python version, WireGuard interface state, and WGDashboard version data.
 
 ## Ports module
 
@@ -125,6 +140,9 @@ deb health
 deb doctor
 deb services
 deb services all
+deb wireguard
+deb wireguard config wg0
+deb wireguard update-check
 deb ports
 deb logs summary
 deb backup profiles
