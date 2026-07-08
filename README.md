@@ -3,7 +3,7 @@
 Professional terminal administration toolkit for Debian 12 servers.
 
 Status: Stable baseline  
-Version: 1.1.1
+Version: 1.1.2
 
 ## Goals
 
@@ -15,6 +15,7 @@ Inspired by tools such as `btop`, `fastfetch`, `lazygit`, and `ncdu`, but intent
 
 ```text
 deb menu        Command panel
+deb commands    Full command and subcommand reference
 deb health      Health dashboard
 deb doctor      Diagnostics and health checks
 deb services    Service overview and service actions
@@ -25,6 +26,8 @@ deb backup      Backup profiles and archive management
 deb update      Safe APT update workflow
 ```
 
+Use `deb commands` to see every supported subcommand. Use `deb MODULE help` for module help, for example `deb wireguard help` or `deb logs help`.
+
 ## Panel
 
 ```text
@@ -32,6 +35,7 @@ deb              Show command panel
 deb menu         Show command panel
 deb menu run     Open interactive command picker
 deb menu help    Show menu help
+deb commands     Show all commands and subcommands
 ```
 
 ## Services module
@@ -151,6 +155,7 @@ deb
 ```bash
 deb --version
 deb
+deb commands
 deb health
 deb doctor
 deb services
