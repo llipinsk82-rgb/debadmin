@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.1
+## 0.3.0 polish
 
 - Polished Health Dashboard terminal layout.
 - Reduced dashboard width for SSH terminals.
