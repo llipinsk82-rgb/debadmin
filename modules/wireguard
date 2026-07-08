@@ -23,7 +23,10 @@ Usage:
   deb wireguard status               Show WireGuard and WGDashboard overview
   deb wireguard config [IFACE]       Check WireGuard config without printing secrets
   deb wireguard dashboard            Show WGDashboard service details
+  deb wireguard public-check         Check configured public WGDashboard URL
   deb wireguard update-check         Compare local WGDashboard version with GitHub latest
+  deb wireguard backups              Show WGDashboard and WireGuard backup paths
+  deb wireguard cleanup-info         Show safe backup cleanup guidance
   deb wireguard restart-dashboard    Restart WGDashboard service as root
   deb wireguard restart-tunnel IFACE Restart wg-quick tunnel as root
   deb wireguard logs [N]             Show WGDashboard logs
@@ -33,6 +36,8 @@ Config:
   DAT_WG_DASHBOARD_SERVICE=wg-dashboard
   DAT_WG_DASHBOARD_PORT=10086
   DAT_WG_DASHBOARD_URL=http://127.0.0.1:10086/
+  DAT_WG_DASHBOARD_PUBLIC_URL=
+  DAT_WG_DASHBOARD_VERSION=
 EOF
 }
 
@@ -43,7 +48,7 @@ case "$COMMAND" in
     status|overview)
         header "DebAdmin WireGuard $DAT_VERSION"
         wg_print_overview
-        footer_hint "deb wireguard config wg0 | deb wireguard restart-dashboard"
+        footer_hint "deb wireguard config wg0 | deb wireguard public-check"
         ;;
     config|check)
         iface="${1:-wg0}"
@@ -54,6 +59,10 @@ case "$COMMAND" in
         service="$(wg_dashboard_service)"
         header "DebAdmin WGDashboard $DAT_VERSION"
         service_detail "$service"
+        ;;
+    public-check|public)
+        header "DebAdmin WGDashboard Public $DAT_VERSION"
+        wg_public_check
         ;;
     update-check|update|version)
         header "DebAdmin WGDashboard Update $DAT_VERSION"
@@ -70,6 +79,15 @@ case "$COMMAND" in
         kv "Python" "$(wg_dashboard_python "$base")"
         status_line "$python_status" "Python req"
         footer_hint "backup before updating WGDashboard"
+        ;;
+    backups)
+        header "DebAdmin WGDashboard Backups $DAT_VERSION"
+        wg_backups_list
+        footer_hint "deb wireguard cleanup-info"
+        ;;
+    cleanup-info|cleanup)
+        header "DebAdmin WGDashboard Cleanup $DAT_VERSION"
+        wg_cleanup_info
         ;;
     restart-dashboard|restart)
         header "DebAdmin WGDashboard Restart $DAT_VERSION"
