@@ -3,7 +3,7 @@
 Professional terminal administration toolkit for Debian 12 servers.
 
 Status: Development  
-Version: 0.6.0
+Version: 0.7.0
 
 ## Goals
 
@@ -20,7 +20,7 @@ deb doctor     Diagnostics and health checks
 deb services   Service overview and service actions
 deb ports      Listening ports, filtering, and lookup
 deb logs       Recent system logs
-deb backup     Basic configuration backup
+deb backup     Backup profiles and archive management
 deb update     APT update helper
 ```
 
@@ -53,6 +53,19 @@ deb doctor tools       Run dependency checks
 deb doctor resources   Run CPU/RAM/disk checks
 deb doctor services    Run configured service checks
 ```
+
+## Backup module
+
+```text
+deb backup                 Create default backup
+deb backup create ssh      Create profile backup
+deb backup list            List backup archives
+deb backup verify latest   Verify latest archive
+deb backup contents latest Show archive contents
+deb backup prune 5         Keep newest 5 archives
+```
+
+Customize backups in `/etc/debian-admin-toolkit/config` with `DAT_BACKUP_DIR` and `DAT_BACKUP_ITEMS`.
 
 ## Install
 
