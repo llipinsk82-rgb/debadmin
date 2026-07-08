@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0
+
+- Added Doctor module baseline.
+- Added shared diagnostics helpers in `lib/doctor.sh`.
+- Added system, tool, resource, network, port, and service checks.
+- Added per-section diagnostics commands.
+- Updated README and roadmap for v0.6.0.
+
 ## 0.5.0
 
 - Added Ports module baseline.
