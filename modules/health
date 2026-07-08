@@ -4,7 +4,8 @@ set -euo pipefail
 DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
 [[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
 
-DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DAT_HOME="${DAT_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 LIB_DIR="$DAT_HOME/lib"
 MODULE_DIR="$DAT_HOME/modules"
 
@@ -14,7 +15,7 @@ load_library output
 load_library system
 load_library services
 
-header "DebAdmin Health Dashboard"
+header "DebAdmin Health Dashboard $DAT_VERSION"
 
 section "System"
 kv "Hostname" "$(get_hostname)"
@@ -26,10 +27,10 @@ kv "Load avg" "$(get_load)"
 section "CPU"
 kv "Model" "$(get_cpu_model || printf 'unknown')"
 kv "Cores" "$(get_cpu_cores || printf 'unknown')"
-kv "Temperature" "$(get_cpu_temp)"
+kv "Temp" "$(get_cpu_temp)"
 metric_bar "CPU" "$(get_cpu_usage)"
 
-section "Memory and disk"
+section "Memory / Disk"
 metric_bar "RAM" "$(get_ram_percent)"
 kv "RAM usage" "$(get_ram_summary)"
 metric_bar "Disk" "$(get_disk_percent)"
@@ -41,18 +42,13 @@ kv "Public IP" "$(get_public_ip || printf 'n/a')"
 
 section "Services"
 table_header "Service" "State" "Enabled"
-while read -r service; do
+default_services | while read -r service; do
     [[ -n "$service" ]] || continue
     state="$(service_state "$service")"
     enabled="$(service_enabled_state "$service")"
+    visual="$(service_visual_state "$state")"
 
-    case "$state" in
-        active) visual="$(status_text active)" ;;
-        inactive) visual="$(status_text inactive)" ;;
-        *) visual="$(status_text unknown)" ;;
-    esac
-
-    printf '%-28s %-23b %s\n' "$service" "$visual" "$enabled"
-done < <(default_services)
+    printf '%-20s %-23b %s\n' "$service" "$visual" "$enabled"
+done
 
 printf '\n'
