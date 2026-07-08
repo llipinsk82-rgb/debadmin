@@ -6,11 +6,20 @@ default_services() {
         return
     fi
 
-    printf '%s\n' ssh sshd cron nginx apache2 mysql mariadb postgresql docker fail2ban ufw
+    printf '%s\n' ssh sshd cron nginx oscam oscam-panel blackserv apache2 mysql mariadb postgresql docker fail2ban ufw
 }
 
 service_exists() {
-    systemctl list-unit-files "$1.service" >/dev/null 2>&1 || systemctl status "$1" >/dev/null 2>&1
+    local service="$1"
+
+    if ! command_exists systemctl; then
+        return 1
+    fi
+
+    systemctl list-unit-files "$service.service" --no-legend 2>/dev/null | grep -q . && return 0
+    systemctl status "$service" >/dev/null 2>&1 && return 0
+
+    return 1
 }
 
 service_state() {
@@ -26,7 +35,7 @@ service_state() {
     elif service_exists "$service"; then
         printf 'inactive\n'
     else
-        printf 'unknown\n'
+        printf 'not-installed\n'
     fi
 }
 
@@ -38,5 +47,21 @@ service_enabled_state() {
         return
     fi
 
-    systemctl is-enabled "$service" 2>/dev/null || printf 'unknown\n'
+    if ! service_exists "$service"; then
+        printf 'n/a\n'
+        return
+    fi
+
+    systemctl is-enabled "$service" 2>/dev/null || printf 'disabled\n'
+}
+
+service_visual_state() {
+    local state="$1"
+
+    case "$state" in
+        active) status_text active ;;
+        inactive) status_text inactive ;;
+        not-installed) status_text not-installed ;;
+        *) status_text unknown ;;
+    esac
 }
