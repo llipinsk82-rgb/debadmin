@@ -19,6 +19,8 @@ discovered_wireguard_services() {
     {
         systemctl list-unit-files 'wg-quick@*.service' --no-legend 2>/dev/null | awk '{print $1}'
         systemctl list-units 'wg-quick@*.service' --all --no-legend 2>/dev/null | awk '{print $1}'
+        systemctl list-unit-files 'wg-dashboard.service' 'wgdashboard.service' --no-legend 2>/dev/null | awk '{print $1}'
+        systemctl list-units 'wg-dashboard.service' 'wgdashboard.service' --all --no-legend 2>/dev/null | awk '{print $1}'
     } | sed 's/\.service$//' | awk '$0 != "wg-quick@" && $0 != ""' | sort -u
 }
 
