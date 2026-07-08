@@ -4,28 +4,89 @@ set -euo pipefail
 DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
 [[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
 
-DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DAT_HOME="${DAT_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 LIB_DIR="$DAT_HOME/lib"
-BACKUP_DIR="${DAT_BACKUP_DIR:-/var/backups/debian-admin-toolkit}"
 
 source "$LIB_DIR/core.sh"
 load_library colors
 load_library output
+load_library backup
 
-require_root
+backup_help() {
+    cat <<EOF
+DebAdmin Backup $DAT_VERSION
 
-timestamp="$(date +%Y%m%d-%H%M%S)"
-archive="$BACKUP_DIR/dat-config-$timestamp.tar.gz"
+Usage:
+  deb backup                 Create default backup
+  deb backup create [PROFILE] Create backup profile: default, dat, apt, ssh
+  deb backup list            List backup archives
+  deb backup latest          Show latest archive path
+  deb backup verify [ARCHIVE] Verify archive, default latest
+  deb backup contents [ARCHIVE] Show archive contents, default latest
+  deb backup prune [KEEP]    Keep newest N archives, default 5
+  deb backup profiles        Show available profiles
+  deb backup help            Show this help
 
-header "DebAdmin Backup"
-section "Backup"
+Config:
+  DAT_BACKUP_DIR controls backup directory.
+  DAT_BACKUP_ITEMS overrides profile items.
+EOF
+}
 
-mkdir -p "$BACKUP_DIR"
-tar -czf "$archive" /etc/debian-admin-toolkit /etc/ssh /etc/apt/sources.list /etc/apt/sources.list.d 2>/dev/null || true
+backup_profiles() {
+    table_header "Profile" "Status" "Items"
+    printf '%-20s %-10s %s\n' "default" "ready" "toolkit, ssh, apt"
+    printf '%-20s %-10s %s\n' "dat" "ready" "toolkit config"
+    printf '%-20s %-10s %s\n' "apt" "ready" "apt sources"
+    printf '%-20s %-10s %s\n' "ssh" "ready" "ssh config"
+}
 
-if [[ -s "$archive" ]]; then
-    status_line ok "Created $archive"
-else
-    status_line fail "Backup archive was not created"
-    exit 1
-fi
+COMMAND="${1:-create}"
+shift || true
+
+case "$COMMAND" in
+    create|run)
+        profile="${1:-default}"
+        header "DebAdmin Backup $DAT_VERSION"
+        section "Create backup"
+        backup_create "$profile"
+        ;;
+    list)
+        header "DebAdmin Backups $DAT_VERSION"
+        kv "Directory" "$(backup_dir)"
+        section "Archives"
+        backup_list
+        ;;
+    latest)
+        header "DebAdmin Backup Latest"
+        latest="$(backup_latest)"
+        [[ -n "$latest" ]] && kv "Latest" "$latest" || status_line warn "no backup archive found"
+        ;;
+    verify)
+        archive="${1:-latest}"
+        header "DebAdmin Backup Verify"
+        backup_verify "$archive"
+        ;;
+    contents|show)
+        archive="${1:-latest}"
+        header "DebAdmin Backup Contents"
+        backup_contents "$archive"
+        ;;
+    prune)
+        keep="${1:-5}"
+        header "DebAdmin Backup Prune"
+        kv "Keep" "$keep"
+        backup_prune "$keep"
+        ;;
+    profiles)
+        header "DebAdmin Backup Profiles"
+        backup_profiles
+        ;;
+    help|-h|--help)
+        backup_help
+        ;;
+    *)
+        die "Unknown backup command: $COMMAND"
+        ;;
+esac
