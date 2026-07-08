@@ -70,6 +70,10 @@ wg_dashboard_python() {
     fi
 }
 
+wg_dashboard_python_major_minor() {
+    wg_dashboard_python "$1" | awk '{print $2}' | awk -F. '{print $1"."$2}'
+}
+
 wg_dashboard_local_version() {
     local base="${1:-$(wg_dashboard_base_dir)}"
     local file version
@@ -89,6 +93,12 @@ wg_dashboard_local_version() {
             [[ -n "$version" ]] && printf '%s\n' "$version" && return 0
         fi
     done
+
+    version="$(grep -Rho 'v[0-9][0-9.]*' "$base" 2>/dev/null | sort -V | tail -n 1 || true)"
+    if [[ -n "$version" ]]; then
+        printf '%s\n' "$version"
+        return 0
+    fi
 
     printf 'unknown\n'
 }
@@ -123,6 +133,30 @@ wg_dashboard_http_ok() {
     return 1
 }
 
+wg_dashboard_version_status() {
+    local local_version="$1"
+    local latest_version="$2"
+
+    if [[ -z "$latest_version" || "$latest_version" == unknown* || "$local_version" == unknown* ]]; then
+        printf 'unknown\n'
+    elif [[ "$local_version" == "$latest_version" ]]; then
+        printf 'ok\n'
+    else
+        printf 'warn\n'
+    fi
+}
+
+wg_dashboard_python_status() {
+    local base="$1"
+    local py
+
+    py="$(wg_dashboard_python_major_minor "$base")"
+    case "$py" in
+        3.12|3.13|3.14|3.15|3.16|3.17|3.18|3.19) printf 'ok\n' ;;
+        *) printf 'warn\n' ;;
+    esac
+}
+
 wg_print_overview() {
     local service state enabled port url base python local_version latest_version
 
@@ -154,8 +188,10 @@ wg_print_overview() {
     kv "URL" "$url"
     kv "Path" "${base:-unknown}"
     kv "Python" "$python"
+    status_line "Python req" "$(wg_dashboard_python_status "$base")"
     kv "Local ver" "$local_version"
     kv "Latest ver" "${latest_version:-unknown}"
+    status_line "Update" "$(wg_dashboard_version_status "$local_version" "${latest_version:-unknown}")"
 
     if wg_dashboard_port_open "$port"; then
         status_line "Port check" "ok"
