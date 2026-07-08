@@ -33,11 +33,29 @@ deb services status nginx
 deb services logs nginx 20
 ```
 
+## WireGuard and WGDashboard
+
+```bash
+deb wireguard
+deb wireguard config wg0
+deb wireguard dashboard
+deb wireguard update-check
+deb wireguard logs 50
+```
+
+Root-only restart tests:
+
+```bash
+sudo deb wireguard restart-dashboard
+sudo deb wireguard restart-tunnel wg0
+```
+
 ## Ports
 
 ```bash
 deb ports
 deb ports port 80
+deb ports port 10086
 deb ports find nginx
 deb ports summary
 ```
@@ -76,3 +94,4 @@ deb update logs
 - Non-root commands should work as normal user where possible.
 - Root-only actions should show a clear root requirement when run without sudo.
 - Dashboard and tables should fit normal SSH terminal width.
+- WGDashboard should show service, port, local HTTP, Python, and version status.
