@@ -21,6 +21,6 @@ printf '%-28s %-14s %s\n' "ports" "ready" "Ports overview and lookup"
 printf '%-28s %-14s %s\n' "doctor" "ready" "Diagnostics and health checks"
 printf '%-28s %-14s %s\n' "backup" "ready" "Backup profiles and archives"
 printf '%-28s %-14s %s\n' "logs" "ready" "Log browser and filters"
-printf '%-28s %-14s %s\n' "update" "ready" "Package update helper"
+printf '%-28s %-14s %s\n' "update" "ready" "Safe APT update workflow"
 
-printf '\nRun: %sdeb health%s or %sdeb logs errors%s\n' "$CYAN" "$RESET" "$CYAN" "$RESET"
+printf '\nRun: %sdeb health%s or %sdeb update dry-run%s\n' "$CYAN" "$RESET" "$CYAN" "$RESET"
