@@ -13,6 +13,7 @@ sudo ./install.sh
 ```bash
 deb --version
 deb
+deb commands
 deb menu help
 ```
 
@@ -97,6 +98,7 @@ deb update logs
 - Non-root commands should work as normal user where possible.
 - Root-only actions should show a clear root requirement when run without sudo.
 - Dashboard and tables should fit normal SSH terminal width.
+- `deb commands` should show all modules and subcommands.
 - WGDashboard should show service, port, local HTTP, Python, and version status.
 - Public WGDashboard check should show missing when public URL is not configured, or OK/FAIL when configured.
 - Backup listing should show available manual backup paths without deleting anything.
