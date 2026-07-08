@@ -25,4 +25,4 @@ default_services | while read -r service; do
     printf '%-20s %-23b %s\n' "$service" "$visual" "$enabled"
 done
 
-printf '\n'
+printf '\nTip: set DAT_SERVICES in /etc/debian-admin-toolkit/config to customize this list.\n'
