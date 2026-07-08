@@ -75,7 +75,16 @@ Status: completed baseline.
 
 ## v0.9.0 — Update
 
-Safe system update workflow.
+Status: completed baseline.
+
+- Update summary
+- Upgradable package list
+- APT refresh
+- Dry-run simulation
+- Upgrade and full-upgrade helpers
+- Autoremove and autoclean helpers
+- Safe update workflow
+- Update logs
 
 ## v1.0.0
 
