@@ -24,6 +24,12 @@ Usage:
   deb services status NAME     Show service details
   deb services detail NAME     Show service details
   deb services logs NAME [N]   Show last N journal lines for service
+  deb services start NAME      Start service as root
+  deb services stop NAME       Stop service as root
+  deb services restart NAME    Restart service as root
+  deb services reload NAME     Reload service as root
+  deb services enable NAME     Enable service as root
+  deb services disable NAME    Disable service as root
   deb services help            Show this help
 
 Config:
@@ -41,7 +47,7 @@ services_list() {
     done
 }
 
-service_operation_hint() {
+service_operation() {
     local name="$1"
     local operation="$2"
 
@@ -88,7 +94,7 @@ case "$COMMAND" in
     start|stop|restart|reload|enable|disable)
         service="${1:-}"
         [[ -n "$service" ]] || die "Service name required."
-        service_operation_hint "$service" "$COMMAND"
+        service_operation "$service" "$COMMAND"
         header "DebAdmin Service: $service"
         service_detail "$service"
         ;;
