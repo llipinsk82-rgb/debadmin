@@ -2,6 +2,8 @@
 
 ## v0.3.0 — Health Dashboard
 
+Status: completed.
+
 - Color terminal layout
 - CPU bar
 - RAM bar
@@ -15,7 +17,13 @@
 
 ## v0.4.0 — Services
 
-Service list, detail view, start/stop/restart helpers.
+Status: completed baseline.
+
+- Configured service overview
+- Service detail view
+- Recent service logs
+- Start, stop, restart, reload helpers
+- Enable and disable helpers
 
 ## v0.5.0 — Ports
 
