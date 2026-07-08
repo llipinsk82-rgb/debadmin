@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+DAT_HOME="$(cd "$(dirname "$0")/.." && pwd)"
+
+source "$DAT_HOME/lib/core.sh"
+
+load_library colors
+
+load_library output
+
+header
+
+printf "%-20s %s\n" "health" "Server dashboard"
+
+printf "%-20s %s\n" "doctor" "Diagnostics"
+
+printf "%-20s %s\n" "ports" "Listening ports"
+
+printf "%-20s %s\n" "services" "Services"
+
+printf "%-20s %s\n" "logs" "View logs"
+
+printf "%-20s %s\n" "backup" "Backup file"
+
+printf "%-20s %s\n" "update" "System update"
+
+echo

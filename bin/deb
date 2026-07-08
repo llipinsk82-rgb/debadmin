@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+CONFIG_FILE="/etc/debian-admin-toolkit/config"
+
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "Configuration file not found:"
+    echo "  $CONFIG_FILE"
+    exit 1
+fi
+
+source "$CONFIG_FILE"
+
+if [[ -z "${DAT_HOME:-}" ]]; then
+    echo "DAT_HOME is not configured."
+    exit 1
+fi
+
+source "$DAT_HOME/lib/core.sh"
+
+COMMAND="${1:-menu}"
+shift || true
+
+MODULE="$MODULE_DIR/$COMMAND"
+
+if [[ ! -x "$MODULE" ]]; then
+    echo "Unknown command: $COMMAND"
+    echo
+    exec "$MODULE_DIR/menu"
+fi
+
+exec "$MODULE" "$@"
