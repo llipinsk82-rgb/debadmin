@@ -41,6 +41,24 @@ services_list() {
     done
 }
 
+service_operation_hint() {
+    local name="$1"
+    local operation="$2"
+
+    require_root
+    service_exists "$name" || die "Service not found: $name"
+
+    case "$operation" in
+        start) systemctl start "$name" ;;
+        stop) systemctl stop "$name" ;;
+        restart) systemctl restart "$name" ;;
+        reload) systemctl reload "$name" ;;
+        enable) systemctl enable "$name" ;;
+        disable) systemctl disable "$name" ;;
+        *) die "Unsupported service operation: $operation" ;;
+    esac
+}
+
 COMMAND="${1:-list}"
 shift || true
 
@@ -66,6 +84,13 @@ case "$COMMAND" in
         [[ -n "$service" ]] || die "Service name required."
         header "DebAdmin Service Logs: $service"
         service_logs "$service" "$lines"
+        ;;
+    start|stop|restart|reload|enable|disable)
+        service="${1:-}"
+        [[ -n "$service" ]] || die "Service name required."
+        service_operation_hint "$service" "$COMMAND"
+        header "DebAdmin Service: $service"
+        service_detail "$service"
         ;;
     help|-h|--help)
         services_help
