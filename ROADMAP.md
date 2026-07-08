@@ -27,7 +27,14 @@ Status: completed baseline.
 
 ## v0.5.0 — Ports
 
-Port overview, process mapping, filtering.
+Status: completed baseline.
+
+- Listening port overview
+- Backend detection with ss/netstat
+- TCP and UDP summary
+- Raw socket view
+- Text filtering
+- Port lookup
 
 ## v0.6.0 — Doctor
 
