@@ -3,7 +3,7 @@
 Professional terminal administration toolkit for Debian 12 servers.
 
 Status: Stable baseline  
-Version: 1.1.0
+Version: 1.1.1
 
 ## Goals
 
@@ -53,13 +53,28 @@ Customize the watched service list in `/etc/debian-admin-toolkit/config` with `D
 deb wireguard                      Show WireGuard and WGDashboard overview
 deb wireguard config wg0           Check WireGuard config without printing secrets
 deb wireguard dashboard            Show WGDashboard service details
+deb wireguard public-check         Check configured public WGDashboard URL
 deb wireguard update-check         Compare local WGDashboard version with GitHub latest
+deb wireguard backups              Show WGDashboard and WireGuard backup paths
+deb wireguard cleanup-info         Show safe backup cleanup guidance
 deb wireguard restart-dashboard    Restart WGDashboard service as root
 deb wireguard restart-tunnel wg0   Restart wg-quick tunnel as root
 deb wireguard logs 100             Show WGDashboard logs
 ```
 
-The module checks `wg-dashboard.service`, the local HTTP endpoint, port `10086`, Python version, WireGuard interface state, and WGDashboard version data.
+The module checks `wg-dashboard.service`, the local HTTP endpoint, port `10086`, Python version, WireGuard interface state, WGDashboard version data, optional public URL reachability, and local backup paths.
+
+Config options:
+
+```text
+DAT_WG_DASHBOARD_SERVICE="wg-dashboard"
+DAT_WG_DASHBOARD_PORT="10086"
+DAT_WG_DASHBOARD_URL="http://127.0.0.1:10086/"
+DAT_WG_DASHBOARD_PUBLIC_URL=""
+DAT_WG_DASHBOARD_VERSION=""
+```
+
+See `docs/WGDASHBOARD_UPDATE.md` for the safe manual WGDashboard maintenance procedure.
 
 ## Ports module
 
@@ -143,6 +158,8 @@ deb services all
 deb wireguard
 deb wireguard config wg0
 deb wireguard update-check
+deb wireguard public-check
+deb wireguard backups
 deb ports
 deb logs summary
 deb backup profiles
