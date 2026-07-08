@@ -19,7 +19,7 @@ DebAdmin Backup $DAT_VERSION
 
 Usage:
   deb backup                 Create default backup
-  deb backup create [PROFILE] Create backup profile: default, dat, apt, ssh
+  deb backup create [PROFILE] Create backup profile: default, dat, apt, ssh, custom
   deb backup list            List backup archives
   deb backup latest          Show latest archive path
   deb backup verify [ARCHIVE] Verify archive, default latest
@@ -30,16 +30,17 @@ Usage:
 
 Config:
   DAT_BACKUP_DIR controls backup directory.
-  DAT_BACKUP_ITEMS overrides profile items.
+  DAT_BACKUP_ITEMS controls default/custom profile items.
 EOF
 }
 
 backup_profiles() {
     table_header "Profile" "Status" "Items"
-    printf '%-20s %-10s %s\n' "default" "ready" "toolkit, ssh, apt"
+    printf '%-20s %-10s %s\n' "default" "ready" "DAT_BACKUP_ITEMS or system defaults"
     printf '%-20s %-10s %s\n' "dat" "ready" "toolkit config"
     printf '%-20s %-10s %s\n' "apt" "ready" "apt sources"
     printf '%-20s %-10s %s\n' "ssh" "ready" "ssh config"
+    printf '%-20s %-10s %s\n' "custom" "ready" "DAT_BACKUP_ITEMS only"
 }
 
 COMMAND="${1:-create}"
