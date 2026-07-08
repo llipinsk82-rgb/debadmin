@@ -86,6 +86,13 @@ Status: completed baseline.
 - Safe update workflow
 - Update logs
 
-## v1.0.0
+## v1.0.0 — Terminal Panel
 
-Full terminal administration panel.
+Status: completed baseline.
+
+- Unified command panel
+- Interactive command picker
+- Refreshed CLI help
+- Full module documentation
+- VPS testing checklist
+- Stable baseline version
