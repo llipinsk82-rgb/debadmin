@@ -1,48 +1,102 @@
 #!/usr/bin/env bash
 
+term_width() {
+    local width
+    width="$(tput cols 2>/dev/null || printf '80')"
+    [[ "$width" =~ ^[0-9]+$ ]] || width=80
+    (( width < 60 )) && width=60
+    (( width > 100 )) && width=100
+    printf '%s\n' "$width"
+}
+
+hr() {
+    local width="${1:-$(term_width)}"
+    printf '%s' "${GRAY}"
+    printf '%*s\n' "$width" '' | tr ' ' '─'
+    printf '%s' "${RESET}"
+}
+
 header() {
-    clear
-    echo
-    echo -e "\033[1;36m╔════════════════════════════════════════════════════════════╗\033[0m"
-    printf "\033[1;36m║ %-58s ║\033[0m\n" "DebAdmin $(cat "$DAT_HOME/VERSION")"
-    echo -e "\033[1;36m╚════════════════════════════════════════════════════════════╝\033[0m"
-    echo
+    local title="${1:-DebAdmin}"
+    local width
+    width="$(term_width)"
+
+    clear 2>/dev/null || true
+    printf '\n'
+    printf '%s╔' "$CYAN"
+    printf '%*s' $((width - 2)) '' | tr ' ' '═'
+    printf '╗%s\n' "$RESET"
+    printf '%s║%s %-*s %s║%s\n' "$CYAN" "$WHITE" $((width - 4)) "$title" "$CYAN" "$RESET"
+    printf '%s╚' "$CYAN"
+    printf '%*s' $((width - 2)) '' | tr ' ' '═'
+    printf '╝%s\n\n' "$RESET"
 }
 
-line() {
-    echo -e "\033[1;30m────────────────────────────────────────────────────────────\033[0m"
+section() {
+    printf '\n%s%s%s\n' "$BOLD" "$1" "$RESET"
+    hr
 }
 
-ok() {
-    printf "\033[1;32m●\033[0m %s\n" "$1"
+kv() {
+    printf '%s%-18s%s %s\n' "$CYAN" "$1" "$RESET" "${2:-}"
 }
 
-warn() {
-    printf "\033[1;33m●\033[0m %s\n" "$1"
+status_text() {
+    local state="${1:-unknown}"
+
+    case "$state" in
+        ok|active|running|enabled|healthy)
+            printf '%s● OK%s' "$GREEN" "$RESET"
+            ;;
+        warn|warning|degraded)
+            printf '%s● WARN%s' "$YELLOW" "$RESET"
+            ;;
+        fail|failed|inactive|error)
+            printf '%s● FAIL%s' "$RED" "$RESET"
+            ;;
+        *)
+            printf '%s● UNKNOWN%s' "$GRAY" "$RESET"
+            ;;
+    esac
 }
 
-fail() {
-    printf "\033[1;31m○\033[0m %s\n" "$1"
-}
-
-info() {
-    printf "\033[1;36m➜\033[0m %s\n" "$1"
+status_line() {
+    local state="$1"
+    local label="$2"
+    printf '%-28s %s\n' "$label" "$(status_text "$state")"
 }
 
 bar() {
-    local percent=$1
-    local width=30
+    local percent
+    percent="$(clamp_percent "${1:-0}")"
+    local width="${2:-30}"
     local filled=$((percent * width / 100))
+    local empty=$((width - filled))
+    local color="$GREEN"
 
-    printf "["
+    if (( percent >= 85 )); then
+        color="$RED"
+    elif (( percent >= 70 )); then
+        color="$YELLOW"
+    fi
 
-    for ((i=0;i<filled;i++)); do
-        printf "█"
-    done
+    printf '%s[' "$GRAY"
+    printf '%s' "$color"
+    for ((i = 0; i < filled; i++)); do printf '█'; done
+    printf '%s' "$GRAY"
+    for ((i = 0; i < empty; i++)); do printf '░'; done
+    printf ']%s %3d%%' "$RESET" "$percent"
+}
 
-    for ((i=filled;i<width;i++)); do
-        printf "░"
-    done
+metric_bar() {
+    local label="$1"
+    local value="${2:-0}"
+    printf '%-10s ' "$label"
+    bar "$value" 34
+    printf '\n'
+}
 
-    printf "] %3d%%" "$percent"
+table_header() {
+    printf '%s%-28s %-14s %s%s\n' "$BOLD" "$1" "$2" "$3" "$RESET"
+    hr
 }

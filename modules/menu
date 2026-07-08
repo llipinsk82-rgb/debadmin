@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-set -e
+DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
+[[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
 
-source /etc/debian-admin-toolkit/config
-source "$DAT_HOME/lib/core.sh"
+DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+LIB_DIR="$DAT_HOME/lib"
+MODULE_DIR="$DAT_HOME/modules"
 
+source "$LIB_DIR/core.sh"
 load_library colors
 load_library output
 
-header
+header "DebAdmin $DAT_VERSION"
 
-printf "%-20s %s\n" "health" "System dashboard"
-printf "%-20s %s\n" "doctor" "Diagnostics"
-printf "%-20s %s\n" "services" "Services"
-printf "%-20s %s\n" "ports" "Ports"
-printf "%-20s %s\n" "logs" "Logs"
-printf "%-20s %s\n" "backup" "Backup"
-printf "%-20s %s\n" "update" "Update"
+table_header "Command" "Status" "Description"
+printf '%-28s %-14s %s\n' "health" "ready" "System dashboard"
+printf '%-28s %-14s %s\n' "doctor" "ready" "Basic diagnostics"
+printf '%-28s %-14s %s\n' "services" "ready" "Service status overview"
+printf '%-28s %-14s %s\n' "ports" "ready" "Listening ports"
+printf '%-28s %-14s %s\n' "logs" "ready" "Recent system logs"
+printf '%-28s %-14s %s\n' "backup" "ready" "Configuration backup"
+printf '%-28s %-14s %s\n' "update" "ready" "Package update helper"
 
-echo
+printf '\nRun: %sdeb health%s\n' "$CYAN" "$RESET"

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
+[[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
+
+DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+LIB_DIR="$DAT_HOME/lib"
+BACKUP_DIR="${DAT_BACKUP_DIR:-/var/backups/debian-admin-toolkit}"
+
+source "$LIB_DIR/core.sh"
+load_library colors
+load_library output
+
+require_root
+
+timestamp="$(date +%Y%m%d-%H%M%S)"
+archive="$BACKUP_DIR/dat-config-$timestamp.tar.gz"
+
+header "DebAdmin Backup"
+section "Backup"
+
+mkdir -p "$BACKUP_DIR"
+tar -czf "$archive" /etc/debian-admin-toolkit /etc/ssh /etc/apt/sources.list /etc/apt/sources.list.d 2>/dev/null || true
+
+if [[ -s "$archive" ]]; then
+    status_line ok "Created $archive"
+else
+    status_line fail "Backup archive was not created"
+    exit 1
+fi

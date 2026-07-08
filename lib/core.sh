@@ -1,28 +1,88 @@
 #!/usr/bin/env bash
 
-DAT_VERSION="0.1.0"
+DAT_NAME="Debian Admin Toolkit"
+DAT_VERSION_FILE="$DAT_HOME/VERSION"
+DAT_VERSION="unknown"
 
-LIB_DIR="$DAT_HOME/lib"
-MODULE_DIR="$DAT_HOME/modules"
-CONFIG_DIR="$DAT_HOME/config"
+if [[ -f "$DAT_VERSION_FILE" ]]; then
+    DAT_VERSION="$(tr -d '[:space:]' < "$DAT_VERSION_FILE")"
+fi
+
+LIB_DIR="${LIB_DIR:-$DAT_HOME/lib}"
+MODULE_DIR="${MODULE_DIR:-$DAT_HOME/modules}"
 
 die() {
-    echo "ERROR: $*" >&2
+    printf 'ERROR: %s\n' "$*" >&2
     exit 1
-}
-
-load_library() {
-    local file="$LIB_DIR/$1.sh"
-
-    [[ -f "$file" ]] || die "Library '$1' not found."
-
-    source "$file"
 }
 
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+load_library() {
+    local name="$1"
+    local file="$LIB_DIR/$name.sh"
+
+    [[ -f "$file" ]] || die "Library '$name' not found: $file"
+    source "$file"
+}
+
+run_module() {
+    local name="$1"
+    shift || true
+
+    local module="$MODULE_DIR/$name"
+
+    if [[ ! -x "$module" ]]; then
+        printf 'Unknown command: %s\n\n' "$name" >&2
+        module="$MODULE_DIR/menu"
+    fi
+
+    exec "$module" "$@"
+}
+
 require_root() {
-    [[ $EUID -eq 0 ]] || die "Run as root."
+    [[ "${EUID:-$(id -u)}" -eq 0 ]] || die "Run this command as root."
+}
+
+dat_version() {
+    printf '%s %s\n' "$DAT_NAME" "$DAT_VERSION"
+}
+
+dat_help() {
+    cat <<EOF
+$DAT_NAME $DAT_VERSION
+
+Usage:
+  deb [command]
+
+Commands:
+  menu       Show command overview
+  health     Show health dashboard
+  doctor     Run basic diagnostics
+  services   Show common service states
+  ports      Show listening ports
+  logs       Show recent system logs
+  backup     Create a configuration backup
+  update     Run package index/update helper
+
+Options:
+  -h, --help       Show help
+  -v, --version    Show version
+EOF
+}
+
+clamp_percent() {
+    local value="${1:-0}"
+
+    [[ "$value" =~ ^[0-9]+$ ]] || value=0
+
+    if (( value < 0 )); then
+        value=0
+    elif (( value > 100 )); then
+        value=100
+    fi
+
+    printf '%s\n' "$value"
 }

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
+[[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
+
+DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+LIB_DIR="$DAT_HOME/lib"
+
+source "$LIB_DIR/core.sh"
+load_library colors
+load_library output
+
+header "DebAdmin Logs"
+
+if command_exists journalctl; then
+    section "Recent system journal"
+    journalctl -n "${1:-40}" --no-pager 2>/dev/null || true
+else
+    section "Recent syslog"
+    tail -n "${1:-40}" /var/log/syslog 2>/dev/null || printf 'No readable log source found.\n'
+fi

@@ -1,33 +1,38 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
-CONFIG_FILE="/etc/debian-admin-toolkit/config"
+DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
 
-if [[ ! -f "$CONFIG_FILE" ]]; then
-    echo "Configuration file not found:"
-    echo "  $CONFIG_FILE"
+if [[ -f "$DAT_CONFIG" ]]; then
+    source "$DAT_CONFIG"
+fi
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_HOME="$(cd "$SCRIPT_DIR/.." && pwd)"
+DAT_HOME="${DAT_HOME:-$DEFAULT_HOME}"
+LIB_DIR="$DAT_HOME/lib"
+MODULE_DIR="$DAT_HOME/modules"
+
+if [[ ! -d "$LIB_DIR" || ! -d "$MODULE_DIR" ]]; then
+    echo "Debian Admin Toolkit is not installed correctly." >&2
+    echo "DAT_HOME: $DAT_HOME" >&2
     exit 1
 fi
 
-source "$CONFIG_FILE"
-
-if [[ -z "${DAT_HOME:-}" ]]; then
-    echo "DAT_HOME is not configured."
-    exit 1
-fi
-
-source "$DAT_HOME/lib/core.sh"
+source "$LIB_DIR/core.sh"
 
 COMMAND="${1:-menu}"
 shift || true
 
-MODULE="$MODULE_DIR/$COMMAND"
+case "$COMMAND" in
+    -h|--help|help)
+        dat_help
+        exit 0
+        ;;
+    -v|--version|version)
+        dat_version
+        exit 0
+        ;;
+esac
 
-if [[ ! -x "$MODULE" ]]; then
-    echo "Unknown command: $COMMAND"
-    echo
-    exec "$MODULE_DIR/menu"
-fi
-
-exec "$MODULE" "$@"
+run_module "$COMMAND" "$@"

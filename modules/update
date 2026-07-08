@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
+[[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
+
+DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+LIB_DIR="$DAT_HOME/lib"
+
+source "$LIB_DIR/core.sh"
+load_library colors
+load_library output
+
+require_root
+
+header "DebAdmin Update"
+
+section "APT update"
+apt-get update
+
+section "Upgradeable packages"
+apt list --upgradable 2>/dev/null | sed -n '1,30p'

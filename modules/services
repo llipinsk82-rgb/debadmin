@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
+[[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
+
+DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+LIB_DIR="$DAT_HOME/lib"
+
+source "$LIB_DIR/core.sh"
+load_library colors
+load_library output
+load_library services
+
+header "DebAdmin Services"
+
+table_header "Service" "State" "Enabled"
+while read -r service; do
+    [[ -n "$service" ]] || continue
+    state="$(service_state "$service")"
+    enabled="$(service_enabled_state "$service")"
+
+    case "$state" in
+        active) visual="$(status_text active)" ;;
+        inactive) visual="$(status_text inactive)" ;;
+        *) visual="$(status_text unknown)" ;;
+    esac
+
+    printf '%-28s %-23b %s\n' "$service" "$visual" "$enabled"
+done < <(default_services)
+
+printf '\n'

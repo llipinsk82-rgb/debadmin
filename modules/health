@@ -1,45 +1,58 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-set -e
+DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
+[[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
 
-source /etc/debian-admin-toolkit/config
-source "$DAT_HOME/lib/core.sh"
+DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+LIB_DIR="$DAT_HOME/lib"
+MODULE_DIR="$DAT_HOME/modules"
 
+source "$LIB_DIR/core.sh"
 load_library colors
 load_library output
 load_library system
 load_library services
 
-header
+header "DebAdmin Health Dashboard"
 
-printf "%-15s %s\n" "Hostname" "$(get_hostname)"
-printf "%-15s %s\n" "OS" "$(get_os)"
-printf "%-15s %s\n" "Kernel" "$(get_kernel)"
-printf "%-15s %s\n" "Uptime" "$(get_uptime)"
-printf "%-15s %s\n" "Load" "$(get_load)"
+section "System"
+kv "Hostname" "$(get_hostname)"
+kv "OS" "$(get_os)"
+kv "Kernel" "$(get_kernel)"
+kv "Uptime" "$(get_uptime)"
+kv "Load avg" "$(get_load)"
 
-echo
+section "CPU"
+kv "Model" "$(get_cpu_model || printf 'unknown')"
+kv "Cores" "$(get_cpu_cores || printf 'unknown')"
+kv "Temperature" "$(get_cpu_temp)"
+metric_bar "CPU" "$(get_cpu_usage)"
 
-printf "%-15s %s%%\n" "CPU" "$(get_cpu_usage)"
-printf "%-15s %s%%\n" "RAM" "$(get_ram_percent)"
-printf "%-15s %s%%\n" "Disk" "$(get_disk_percent)"
+section "Memory and disk"
+metric_bar "RAM" "$(get_ram_percent)"
+kv "RAM usage" "$(get_ram_summary)"
+metric_bar "Disk" "$(get_disk_percent)"
+kv "Disk usage" "$(get_disk_summary)"
 
-echo
+section "Network"
+kv "Local IP" "$(get_local_ip || printf 'n/a')"
+kv "Public IP" "$(get_public_ip || printf 'n/a')"
 
-echo "Services"
+section "Services"
+table_header "Service" "State" "Enabled"
+while read -r service; do
+    [[ -n "$service" ]] || continue
+    state="$(service_state "$service")"
+    enabled="$(service_enabled_state "$service")"
 
-echo
+    case "$state" in
+        active) visual="$(status_text active)" ;;
+        inactive) visual="$(status_text inactive)" ;;
+        *) visual="$(status_text unknown)" ;;
+    esac
 
-for svc in ssh nginx cron oscam-panel blackserv
-do
+    printf '%-28s %-23b %s\n' "$service" "$visual" "$enabled"
+done < <(default_services)
 
-if service_ok "$svc"
-then
-    ok "$svc"
-else
-    fail "$svc"
-fi
-
-done
-
-echo
+printf '\n'

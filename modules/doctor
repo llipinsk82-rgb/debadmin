@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
+[[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
+
+DAT_HOME="${DAT_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+LIB_DIR="$DAT_HOME/lib"
+
+source "$LIB_DIR/core.sh"
+load_library colors
+load_library output
+load_library system
+
+header "DebAdmin Doctor"
+
+section "Checks"
+[[ -r /etc/os-release ]] && status_line ok "/etc/os-release readable" || status_line fail "/etc/os-release readable"
+[[ -r /proc/loadavg ]] && status_line ok "/proc/loadavg readable" || status_line fail "/proc/loadavg readable"
+[[ -r /proc/meminfo ]] && status_line ok "/proc/meminfo readable" || status_line fail "/proc/meminfo readable"
+command_exists systemctl && status_line ok "systemctl available" || status_line warn "systemctl available"
+command_exists ss && status_line ok "ss available" || status_line warn "ss available"
+command_exists curl && status_line ok "curl available for public IP" || status_line warn "curl available for public IP"
+
+section "Resource warning levels"
+cpu="$(get_cpu_usage)"
+ram="$(get_ram_percent)"
+disk="$(get_disk_percent)"
+
+(( cpu >= 90 )) && status_line fail "CPU usage ${cpu}%" || status_line ok "CPU usage ${cpu}%"
+(( ram >= 90 )) && status_line fail "RAM usage ${ram}%" || status_line ok "RAM usage ${ram}%"
+(( disk >= 90 )) && status_line fail "Disk usage ${disk}%" || status_line ok "Disk usage ${disk}%"
+
+printf '\n'
