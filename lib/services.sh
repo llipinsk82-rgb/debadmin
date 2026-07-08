@@ -3,6 +3,7 @@
 default_services() {
     if [[ -n "${DAT_SERVICES:-}" ]]; then
         printf '%s\n' $DAT_SERVICES
+        discovered_wireguard_services
         return
     fi
 
