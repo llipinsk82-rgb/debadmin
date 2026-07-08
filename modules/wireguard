@@ -59,10 +59,14 @@ case "$COMMAND" in
         header "DebAdmin WGDashboard Update $DAT_VERSION"
         section "WGDashboard version"
         base="$(wg_dashboard_base_dir)"
+        local_version="$(wg_dashboard_local_version "$base")"
+        latest_version="$(wg_dashboard_latest_version)"
         kv "Path" "${base:-unknown}"
-        kv "Local" "$(wg_dashboard_local_version "$base")"
-        kv "Latest" "$(wg_dashboard_latest_version)"
+        kv "Local" "$local_version"
+        kv "Latest" "${latest_version:-unknown}"
+        status_line "Update" "$(wg_dashboard_version_status "$local_version" "${latest_version:-unknown}")"
         kv "Python" "$(wg_dashboard_python "$base")"
+        status_line "Python req" "$(wg_dashboard_python_status "$base")"
         footer_hint "backup before updating WGDashboard"
         ;;
     restart-dashboard|restart)
