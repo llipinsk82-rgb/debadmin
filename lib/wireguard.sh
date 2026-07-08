@@ -34,6 +34,10 @@ wg_dashboard_url() {
     printf '%s\n' "${DAT_WG_DASHBOARD_URL:-http://127.0.0.1:$(wg_dashboard_port)/}"
 }
 
+wg_dashboard_public_url() {
+    printf '%s\n' "${DAT_WG_DASHBOARD_PUBLIC_URL:-}"
+}
+
 wg_dashboard_base_dir() {
     local service="${1:-$(wg_dashboard_service)}"
     local workdir=""
@@ -135,6 +139,18 @@ wg_dashboard_http_ok() {
     return 1
 }
 
+wg_dashboard_public_http_ok() {
+    local url="${1:-$(wg_dashboard_public_url)}"
+
+    [[ -n "$url" ]] || return 1
+
+    if command_exists curl && curl -fsS -I --max-time 8 "$url" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    return 1
+}
+
 wg_dashboard_version_status() {
     local local_version="$1"
     local latest_version="$2"
@@ -160,13 +176,14 @@ wg_dashboard_python_status() {
 }
 
 wg_print_overview() {
-    local service state enabled port url base python local_version latest_version
+    local service state enabled port url base python local_version latest_version public_url
 
     service="$(wg_dashboard_service)"
     state="$(service_state "$service")"
     enabled="$(service_enabled_state "$service")"
     port="$(wg_dashboard_port)"
     url="$(wg_dashboard_url)"
+    public_url="$(wg_dashboard_public_url)"
     base="$(wg_dashboard_base_dir "$service")"
     python="$(wg_dashboard_python "$base")"
     local_version="$(wg_dashboard_local_version "$base")"
@@ -188,6 +205,7 @@ wg_print_overview() {
     kv "Enabled" "$enabled"
     kv "Port" "$port"
     kv "URL" "$url"
+    [[ -n "$public_url" ]] && kv "Public URL" "$public_url"
     kv "Path" "${base:-unknown}"
     kv "Python" "$python"
     status_line "$(wg_dashboard_python_status "$base")" "Python req"
@@ -205,6 +223,28 @@ wg_print_overview() {
         status_line "ok" "HTTP check"
     else
         status_line "fail" "HTTP check"
+    fi
+}
+
+wg_public_check() {
+    local url
+
+    url="$(wg_dashboard_public_url)"
+
+    section "WGDashboard public URL"
+    if [[ -z "$url" ]]; then
+        kv "URL" "not configured"
+        status_line "missing" "Public URL"
+        printf '\nSet DAT_WG_DASHBOARD_PUBLIC_URL in /etc/debian-admin-toolkit/config.\n'
+        return 0
+    fi
+
+    kv "URL" "$url"
+    if wg_dashboard_public_http_ok "$url"; then
+        status_line "ok" "HTTP public"
+    else
+        status_line "fail" "HTTP public"
+        printf '\nLocal checks can still pass when public hairpin/DNS/firewall blocks this request.\n'
     fi
 }
 
@@ -242,6 +282,45 @@ wg_config_check() {
     fi
 
     kv "Peers" "$peer_count"
+}
+
+wg_backup_paths() {
+    find /root -maxdepth 1 \( \
+        -name 'WGDashboard.backup.*' -o \
+        -name 'WGDashboard.before-v*' -o \
+        -name 'WGDashboard.old-*' -o \
+        -name 'wireguard.backup.*' -o \
+        -name 'wg-dashboard.service.backup.*' \
+    \) -print 2>/dev/null | sort -r
+}
+
+wg_backups_list() {
+    local found=0
+    local path size
+
+    section "WGDashboard backups"
+    while read -r path; do
+        [[ -n "$path" ]] || continue
+        found=1
+        if command_exists du; then
+            size="$(du -sh "$path" 2>/dev/null | awk '{print $1}')"
+        else
+            size="n/a"
+        fi
+        printf '%-8s %s\n' "${size:-n/a}" "$path"
+    done < <(wg_backup_paths)
+
+    if [[ "$found" -eq 0 ]]; then
+        status_line "missing" "Backups"
+    fi
+}
+
+wg_cleanup_info() {
+    section "Cleanup info"
+    printf 'Review backups manually before deleting anything.\n'
+    printf 'Keep at least one known-good WGDashboard backup and one WireGuard backup.\n'
+    printf 'Suggested wait time before cleanup: 1-2 days of stable service.\n'
+    wg_backups_list
 }
 
 wg_dashboard_restart() {
