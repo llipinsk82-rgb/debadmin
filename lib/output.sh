@@ -9,21 +9,39 @@ term_width() {
     printf '%s\n' "$width"
 }
 
+ui_width() {
+    printf '%s\n' "${DAT_UI_WIDTH:-58}"
+}
+
+repeat_char() {
+    local char="$1"
+    local count="$2"
+    local i
+    for ((i = 0; i < count; i++)); do
+        printf '%s' "$char"
+    done
+}
+
 hr() {
-    local width="${1:-42}"
+    local width="${1:-$(ui_width)}"
     printf '%s' "${GRAY}"
-    printf '%*s\n' "$width" '' | tr ' ' '-'
-    printf '%s' "${RESET}"
+    repeat_char '-' "$width"
+    printf '%s\n' "${RESET}"
 }
 
 header() {
     local title="${1:-DebAdmin}"
-    local line="========================================================"
+    local width
+    width="$(ui_width)"
 
     clear 2>/dev/null || true
-    printf '\n%s%s%s\n' "$CYAN" "$line" "$RESET"
-    printf '%s  %s%s\n' "$WHITE" "$title" "$RESET"
-    printf '%s%s%s\n' "$CYAN" "$line" "$RESET"
+    printf '\n%s+' "$CYAN"
+    repeat_char '-' $((width - 2))
+    printf '+%s\n' "$RESET"
+    printf '%s|%s %-*s %s|%s\n' "$CYAN" "$WHITE" $((width - 4)) "$title" "$CYAN" "$RESET"
+    printf '%s+' "$CYAN"
+    repeat_char '-' $((width - 2))
+    printf '+%s\n' "$RESET"
 }
 
 section() {
@@ -40,19 +58,19 @@ status_text() {
 
     case "$state" in
         ok|active|running|enabled|healthy)
-            printf '%sOK%s' "$GREEN" "$RESET"
+            printf '%s[ OK ]%s' "$GREEN" "$RESET"
             ;;
         warn|warning|degraded|disabled)
-            printf '%sWARN%s' "$YELLOW" "$RESET"
+            printf '%s[WARN]%s' "$YELLOW" "$RESET"
             ;;
         fail|failed|inactive|error)
-            printf '%sFAIL%s' "$RED" "$RESET"
+            printf '%s[FAIL]%s' "$RED" "$RESET"
             ;;
         not-installed|missing)
-            printf '%sNOT INST%s' "$GRAY" "$RESET"
+            printf '%s[MISS]%s' "$GRAY" "$RESET"
             ;;
         *)
-            printf '%sUNKNOWN%s' "$GRAY" "$RESET"
+            printf '%s[UNKN]%s' "$GRAY" "$RESET"
             ;;
     esac
 }
@@ -79,9 +97,9 @@ bar() {
 
     printf '%s[' "$GRAY"
     printf '%s' "$color"
-    for ((i = 0; i < filled; i++)); do printf '#'; done
+    repeat_char '#' "$filled"
     printf '%s' "$GRAY"
-    for ((i = 0; i < empty; i++)); do printf '.'; done
+    repeat_char '.' "$empty"
     printf ']%s %3d%%' "$RESET" "$percent"
 }
 
@@ -93,7 +111,19 @@ metric_bar() {
     printf '\n'
 }
 
+summary_bar() {
+    local label="$1"
+    local value="${2:-0}"
+    printf '%s%-8s%s ' "$CYAN" "$label" "$RESET"
+    bar "$value" 32
+    printf '\n'
+}
+
 table_header() {
-    printf '%s%-20s %-14s %s%s\n' "$BOLD" "$1" "$2" "$3" "$RESET"
+    printf '%s%-20s %-10s %s%s\n' "$BOLD" "$1" "$2" "$3" "$RESET"
     hr
+}
+
+footer_hint() {
+    printf '\n%sTip:%s %s\n' "$GRAY" "$RESET" "$1"
 }
