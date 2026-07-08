@@ -7,6 +7,18 @@ default_services() {
     fi
 
     printf '%s\n' ssh cron nginx oscam-panel blackserv oscam
+    discovered_wireguard_services
+}
+
+discovered_wireguard_services() {
+    if ! command_exists systemctl; then
+        return 0
+    fi
+
+    {
+        systemctl list-unit-files 'wg-quick@*.service' --no-legend 2>/dev/null | awk '{print $1}'
+        systemctl list-units 'wg-quick@*.service' --all --no-legend 2>/dev/null | awk '{print $1}'
+    } | sed 's/\.service$//' | sort -u
 }
 
 service_exists() {
@@ -69,7 +81,7 @@ service_visual_state() {
 services_for_dashboard() {
     local service state
 
-    default_services | while read -r service; do
+    default_services | sort -u | while read -r service; do
         [[ -n "$service" ]] || continue
         state="$(service_state "$service")"
 
