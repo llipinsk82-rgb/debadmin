@@ -5,6 +5,7 @@ PREFIX="${PREFIX:-/opt/debian-admin-toolkit}"
 BIN_DIR="${BIN_DIR:-/usr/local/bin}"
 CONFIG_DIR="${CONFIG_DIR:-/etc/debian-admin-toolkit}"
 DEFAULT_SERVICES="ssh cron nginx oscam-panel blackserv oscam"
+DEFAULT_BACKUP_ITEMS="/etc/debian-admin-toolkit /etc/ssh /etc/apt/sources.list /etc/apt/sources.list.d"
 
 if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
     echo "Run installer as root." >&2
@@ -23,6 +24,7 @@ DAT_HOME="$PREFIX"
 DAT_SERVICES="${DAT_SERVICES:-$DEFAULT_SERVICES}"
 DAT_SHOW_MISSING_SERVICES="${DAT_SHOW_MISSING_SERVICES:-0}"
 DAT_BACKUP_DIR="${DAT_BACKUP_DIR:-/var/backups/debian-admin-toolkit}"
+DAT_BACKUP_ITEMS="${DAT_BACKUP_ITEMS:-$DEFAULT_BACKUP_ITEMS}"
 EOF
 
 chmod +x "$PREFIX/bin/deb" "$PREFIX/modules/"* 2>/dev/null || true
