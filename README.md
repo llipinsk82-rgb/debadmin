@@ -36,12 +36,14 @@ deb menu help    Show menu help
 ## Services module
 
 ```text
-deb services                 Show configured service overview
+deb services                 Show installed/configured service overview
+deb services all             Show configured services including missing ones
 deb services status nginx    Show service details
 deb services logs nginx 50   Show recent logs
 deb services restart nginx   Restart service as root
 ```
 
+WireGuard units named `wg-quick@*.service` are discovered automatically when present.
 Customize the watched service list in `/etc/debian-admin-toolkit/config` with `DAT_SERVICES`.
 
 ## Ports module
@@ -122,6 +124,7 @@ deb
 deb health
 deb doctor
 deb services
+deb services all
 deb ports
 deb logs summary
 deb backup profiles
