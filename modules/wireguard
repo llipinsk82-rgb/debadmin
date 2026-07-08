@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DAT_CONFIG="${DAT_CONFIG:-/etc/debian-admin-toolkit/config}"
+[[ -f "$DAT_CONFIG" ]] && source "$DAT_CONFIG"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DAT_HOME="${DAT_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+LIB_DIR="$DAT_HOME/lib"
+
+source "$LIB_DIR/core.sh"
+load_library colors
+load_library output
+load_library services
+load_library wireguard
+
+wireguard_help() {
+    cat <<EOF
+DebAdmin WireGuard $DAT_VERSION
+
+Usage:
+  deb wireguard                      Show WireGuard and WGDashboard overview
+  deb wireguard status               Show WireGuard and WGDashboard overview
+  deb wireguard config [IFACE]       Check WireGuard config without printing secrets
+  deb wireguard dashboard            Show WGDashboard service details
+  deb wireguard update-check         Compare local WGDashboard version with GitHub latest
+  deb wireguard restart-dashboard    Restart WGDashboard service as root
+  deb wireguard restart-tunnel IFACE Restart wg-quick tunnel as root
+  deb wireguard logs [N]             Show WGDashboard logs
+  deb wireguard help                 Show this help
+
+Config:
+  DAT_WG_DASHBOARD_SERVICE=wg-dashboard
+  DAT_WG_DASHBOARD_PORT=10086
+  DAT_WG_DASHBOARD_URL=http://127.0.0.1:10086/
+EOF
+}
+
+COMMAND="${1:-status}"
+shift || true
+
+case "$COMMAND" in
+    status|overview)
+        header "DebAdmin WireGuard $DAT_VERSION"
+        wg_print_overview
+        footer_hint "deb wireguard config wg0 | deb wireguard restart-dashboard"
+        ;;
+    config|check)
+        iface="${1:-wg0}"
+        header "DebAdmin WireGuard Config $DAT_VERSION"
+        wg_config_check "$iface"
+        ;;
+    dashboard)
+        service="$(wg_dashboard_service)"
+        header "DebAdmin WGDashboard $DAT_VERSION"
+        service_detail "$service"
+        ;;
+    update-check|update|version)
+        header "DebAdmin WGDashboard Update $DAT_VERSION"
+        section "WGDashboard version"
+        base="$(wg_dashboard_base_dir)"
+        kv "Path" "${base:-unknown}"
+        kv "Local" "$(wg_dashboard_local_version "$base")"
+        kv "Latest" "$(wg_dashboard_latest_version)"
+        kv "Python" "$(wg_dashboard_python "$base")"
+        footer_hint "backup before updating WGDashboard"
+        ;;
+    restart-dashboard|restart)
+        header "DebAdmin WGDashboard Restart $DAT_VERSION"
+        wg_dashboard_restart
+        ;;
+    restart-tunnel)
+        iface="${1:-wg0}"
+        header "DebAdmin WireGuard Restart $DAT_VERSION"
+        wg_tunnel_restart "$iface"
+        ;;
+    logs)
+        lines="${1:-80}"
+        header "DebAdmin WGDashboard Logs $DAT_VERSION"
+        wg_dashboard_logs "$lines"
+        ;;
+    help|-h|--help)
+        wireguard_help
+        ;;
+    *)
+        die "Unknown wireguard command: $COMMAND"
+        ;;
+esac
