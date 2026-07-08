@@ -92,7 +92,7 @@ wg_dashboard_local_version() {
         git -C "$base" describe --tags --always 2>/dev/null && return 0
     fi
 
-    for file in "$base/VERSION" "$base/version" "$base/src/VERSION" "$base/src/version" "$base/src/.version"; do
+    for file in "$base/VERSION" "$base/version" "$base/src/VERSION" "$base/src/version" "$base/src/.version" "$base/src/package.json" "$base/package.json"; do
         if [[ -r "$file" ]]; then
             version="$(grep -Eo 'v?[0-9]+\.[0-9]+\.[0-9]+' "$file" 2>/dev/null | head -n 1 || true)"
             if [[ -z "$version" ]]; then
@@ -101,12 +101,6 @@ wg_dashboard_local_version() {
             [[ -n "$version" ]] && printf '%s\n' "$version" && return 0
         fi
     done
-
-    version="$(grep -RhoE 'v[0-9]+\.[0-9]+\.[0-9]+' "$base" 2>/dev/null | sort -V | tail -n 1 || true)"
-    if [[ -n "$version" ]]; then
-        printf '%s\n' "$version"
-        return 0
-    fi
 
     printf 'unknown\n'
 }
