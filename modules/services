@@ -13,16 +13,64 @@ load_library colors
 load_library output
 load_library services
 
-header "DebAdmin Services $DAT_VERSION"
+services_help() {
+    cat <<EOF
+DebAdmin Services $DAT_VERSION
 
-table_header "Service" "State" "Enabled"
-default_services | while read -r service; do
-    [[ -n "$service" ]] || continue
-    state="$(service_state "$service")"
-    enabled="$(service_enabled_state "$service")"
-    visual="$(service_visual_state "$state")"
+Usage:
+  deb services                 Show configured service overview
+  deb services list            Show configured service overview
+  deb services all             Show configured services including missing ones
+  deb services status NAME     Show service details
+  deb services detail NAME     Show service details
+  deb services logs NAME [N]   Show last N journal lines for service
+  deb services help            Show this help
 
-    printf '%-20s %-23b %s\n' "$service" "$visual" "$enabled"
-done
+Config:
+  Edit DAT_SERVICES in /etc/debian-admin-toolkit/config to customize the list.
+EOF
+}
 
-printf '\nTip: set DAT_SERVICES in /etc/debian-admin-toolkit/config to customize this list.\n'
+services_list() {
+    local source_cmd="${1:-default_services}"
+
+    table_header "Service" "State" "Enabled"
+    $source_cmd | while read -r service; do
+        [[ -n "$service" ]] || continue
+        service_row "$service"
+    done
+}
+
+COMMAND="${1:-list}"
+shift || true
+
+case "$COMMAND" in
+    list)
+        header "DebAdmin Services $DAT_VERSION"
+        services_list default_services
+        footer_hint "deb services status nginx | deb services logs nginx 50"
+        ;;
+    all)
+        header "DebAdmin Services $DAT_VERSION"
+        services_list default_services
+        ;;
+    status|detail)
+        service="${1:-}"
+        [[ -n "$service" ]] || die "Service name required."
+        header "DebAdmin Service: $service"
+        service_detail "$service"
+        ;;
+    logs)
+        service="${1:-}"
+        lines="${2:-40}"
+        [[ -n "$service" ]] || die "Service name required."
+        header "DebAdmin Service Logs: $service"
+        service_logs "$service" "$lines"
+        ;;
+    help|-h|--help)
+        services_help
+        ;;
+    *)
+        die "Unknown services command: $COMMAND"
+        ;;
+esac
