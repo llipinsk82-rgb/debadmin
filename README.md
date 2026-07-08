@@ -3,7 +3,7 @@
 Professional terminal administration toolkit for Debian 12 servers.
 
 Status: Development  
-Version: 0.7.0
+Version: 0.8.0
 
 ## Goals
 
@@ -19,7 +19,7 @@ deb health     Health dashboard
 deb doctor     Diagnostics and health checks
 deb services   Service overview and service actions
 deb ports      Listening ports, filtering, and lookup
-deb logs       Recent system logs
+deb logs       Log browser and filters
 deb backup     Backup profiles and archive management
 deb update     APT update helper
 ```
@@ -66,6 +66,19 @@ deb backup prune 5         Keep newest 5 archives
 ```
 
 Customize backups in `/etc/debian-admin-toolkit/config` with `DAT_BACKUP_DIR` and `DAT_BACKUP_ITEMS`.
+
+## Logs module
+
+```text
+deb logs                 Show recent logs
+deb logs errors 80       Show warnings and errors
+deb logs service nginx   Show service logs
+deb logs find denied     Search recent logs
+deb logs kernel          Show kernel logs
+deb logs follow          Follow logs live
+```
+
+Customize default log output in `/etc/debian-admin-toolkit/config` with `DAT_LOG_LINES`.
 
 ## Install
 
