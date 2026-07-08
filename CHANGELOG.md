@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0
+
+- Added WireGuard module baseline.
+- Added WGDashboard service detection and status checks.
+- Added local HTTP and port checks for WGDashboard.
+- Added WireGuard config checks without printing secrets.
+- Added WGDashboard restart, tunnel restart, logs, and update-check commands.
+- Added WireGuard module to panel and help output.
+
 ## 1.0.0
 
 - Added unified terminal panel baseline.
