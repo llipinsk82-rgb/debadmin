@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.2
+
+- Added `deb commands` full command and subcommand reference.
+- Added command reference entry to the main panel.
+- Added main help hints for `deb commands` and `deb MODULE help`.
+- Updated panel footer to make subcommand discovery clearer.
+
 ## 1.1.1
 
 - Added WGDashboard public URL check.
