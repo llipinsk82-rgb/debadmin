@@ -78,6 +78,11 @@ wg_dashboard_local_version() {
     local base="${1:-$(wg_dashboard_base_dir)}"
     local file version
 
+    if [[ -n "${DAT_WG_DASHBOARD_VERSION:-}" ]]; then
+        printf '%s\n' "$DAT_WG_DASHBOARD_VERSION"
+        return 0
+    fi
+
     if [[ -z "$base" || ! -d "$base" ]]; then
         printf 'unknown\n'
         return 0
@@ -89,12 +94,15 @@ wg_dashboard_local_version() {
 
     for file in "$base/VERSION" "$base/version" "$base/src/VERSION" "$base/src/version" "$base/src/.version"; do
         if [[ -r "$file" ]]; then
-            version="$(head -n 1 "$file" | tr -d '[:space:]')"
+            version="$(grep -Eo 'v?[0-9]+\.[0-9]+\.[0-9]+' "$file" 2>/dev/null | head -n 1 || true)"
+            if [[ -z "$version" ]]; then
+                version="$(head -n 1 "$file" | tr -d '[:space:]')"
+            fi
             [[ -n "$version" ]] && printf '%s\n' "$version" && return 0
         fi
     done
 
-    version="$(grep -Rho 'v[0-9][0-9.]*' "$base" 2>/dev/null | sort -V | tail -n 1 || true)"
+    version="$(grep -RhoE 'v[0-9]+\.[0-9]+\.[0-9]+' "$base" 2>/dev/null | sort -V | tail -n 1 || true)"
     if [[ -n "$version" ]]; then
         printf '%s\n' "$version"
         return 0
