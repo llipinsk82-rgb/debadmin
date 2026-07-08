@@ -40,6 +40,9 @@ deb wireguard
 deb wireguard config wg0
 deb wireguard dashboard
 deb wireguard update-check
+deb wireguard public-check
+deb wireguard backups
+deb wireguard cleanup-info
 deb wireguard logs 50
 ```
 
@@ -95,3 +98,5 @@ deb update logs
 - Root-only actions should show a clear root requirement when run without sudo.
 - Dashboard and tables should fit normal SSH terminal width.
 - WGDashboard should show service, port, local HTTP, Python, and version status.
+- Public WGDashboard check should show missing when public URL is not configured, or OK/FAIL when configured.
+- Backup listing should show available manual backup paths without deleting anything.
